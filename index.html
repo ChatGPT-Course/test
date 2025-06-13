@@ -1,0 +1,299 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Страница 1</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+        }
+        
+        h1 {
+            text-align: center;
+            color: var(--tg-theme-text-color, #000000);
+        }
+        
+        .user-info {
+            background: var(--tg-theme-secondary-bg-color, #f8f9fa);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .info-item {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        
+        .button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: var(--tg-theme-button-color, #0088cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        
+        .button:hover {
+            opacity: 0.8;
+        }
+        
+        .button:active {
+            transform: scale(0.98);
+        }
+        
+        .spam-button {
+            background: #ff6b6b;
+        }
+        
+        .loading {
+            text-align: center;
+            color: var(--tg-theme-hint-color, #999999);
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>Страница 1</h1>
+    
+    <div class="user-info">
+        <div class="info-item">
+            <strong>ID:</strong> <span id="userId">Загрузка...</span>
+        </div>
+        <div class="info-item">
+            <strong>Username:</strong> <span id="username">Загрузка...</span>
+        </div>
+        <div class="info-item">
+            <strong>Баланс:</strong> <span id="balance">Загрузка...</span>
+        </div>
+        <div class="info-item">
+            <strong>Карточки:</strong> <span id="card">Загрузка...</span>
+        </div>
+    </div>
+    
+    <div id="status" class="status" style="display: none;"></div>
+    
+    <a href="test2.html" class="button">Перейти на страницу 2</a>
+    
+    <button class="button spam-button" onclick="addRecord()" id="spamBtn">
+        Добавить запись (0, 0, 0, 0)
+    </button>
+
+    <script>
+        const WORKER_URL = 'https://googletest.egorspirin10.workers.dev/';
+        
+        let tgUser = null;
+        let currentUserData = null;
+
+        // Инициализация Telegram WebApp
+        function initTelegram() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                const tg = window.Telegram.WebApp;
+                tg.ready();
+                tg.expand();
+                
+                if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                    tgUser = tg.initDataUnsafe.user;
+                    console.log('Telegram user:', tgUser);
+                } else {
+                    // Тестовые данные для разработки
+                    tgUser = {
+                        id: 123456789,
+                        username: 'testuser'
+                    };
+                    console.log('Using test user data');
+                }
+            } else {
+                // Тестовые данные если Telegram API недоступен
+                tgUser = {
+                    id: 123456789,
+                    username: 'testuser'
+                };
+                console.log('Telegram WebApp not available, using test data');
+            }
+            
+            document.getElementById('userId').textContent = tgUser.id;
+            document.getElementById('username').textContent = tgUser.username || 'Не указан';
+            
+            checkAndCreateUser();
+        }
+
+        // Показать статус
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            statusEl.style.display = 'block';
+            
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 3000);
+        }
+
+        // Запрос к Worker API
+        async function makeRequest(endpoint, options = {}) {
+            try {
+                const response = await fetch(`${WORKER_URL}${endpoint}`, {
+                    method: options.method || 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    body: options.body ? JSON.stringify(options.body) : undefined
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Request failed:', error);
+                throw error;
+            }
+        }
+
+        // Получить данные пользователя из таблицы
+        async function getUserData() {
+            try {
+                const result = await makeRequest('api/sheets/data');
+                const data = result.data;
+                
+                if (!data || data.length <= 1) {
+                    return null;
+                }
+                
+                // Поиск пользователя по ID (предполагаем что ID в первом столбце)
+                for (let i = 1; i < data.length; i++) {
+                    if (data[i][0] && data[i][0].toString() === tgUser.id.toString()) {
+                        return {
+                            id: data[i][0],
+                            username: data[i][1] || '',
+                            balance: data[i][2] || '0',
+                            card: data[i][3] || ''
+                        };
+                    }
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('Error getting user data:', error);
+                return null;
+            }
+        }
+
+        // Создать нового пользователя
+        async function createUser() {
+            try {
+                const result = await makeRequest('api/sheets/append', {
+                    method: 'POST',
+                    body: {
+                        values: [[tgUser.id, tgUser.username || '', 0, '']]
+                    }
+                });
+                
+                console.log('User created:', result);
+                return {
+                    id: tgUser.id,
+                    username: tgUser.username || '',
+                    balance: '0',
+                    card: ''
+                };
+            } catch (error) {
+                console.error('Error creating user:', error);
+                throw error;
+            }
+        }
+
+        // Проверить и создать пользователя если нужно
+        async function checkAndCreateUser() {
+            try {
+                let userData = await getUserData();
+                
+                if (!userData) {
+                    console.log('User not found, creating new user...');
+                    userData = await createUser();
+                    showStatus('Пользователь создан!', 'success');
+                } else {
+                    console.log('User found:', userData);
+                    showStatus('Данные загружены', 'success');
+                }
+                
+                currentUserData = userData;
+                updateUI(userData);
+                
+            } catch (error) {
+                console.error('Error in checkAndCreateUser:', error);
+                showStatus('Ошибка загрузки данных', 'error');
+                
+                // Показываем базовые данные даже при ошибке
+                updateUI({
+                    id: tgUser.id,
+                    username: tgUser.username || '',
+                    balance: 'Ошибка',
+                    card: 'Ошибка'
+                });
+            }
+        }
+
+        // Обновить интерфейс
+        function updateUI(userData) {
+            document.getElementById('balance').textContent = userData.balance;
+            document.getElementById('card').textContent = userData.card || 'Пусто';
+        }
+
+        // Добавить запись (для спама)
+        async function addRecord() {
+            try {
+                const result = await makeRequest('api/sheets/append', {
+                    method: 'POST',
+                    body: {
+                        values: [[0, 0, 0, 0]]
+                    }
+                });
+                
+                showStatus('Запись добавлена!', 'success');
+                console.log('Record added:', result);
+                
+            } catch (error) {
+                console.error('Error adding record:', error);
+                showStatus('Ошибка добавления записи', 'error');
+            }
+        }
+
+        // Инициализация при загрузке страницы
+        window.addEventListener('load', initTelegram);
+    </script>
+</body>
+</html>
