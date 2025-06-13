@@ -100,7 +100,7 @@
 
     <div id="status" class="status" style="display: none;"></div>
 
-    <a href="test1.html" class="button">Перейти на страницу 1</a>
+    <a href="index.html" class="button">Перейти на страницу 1</a>
 
     <script>
         const WORKER_URL = 'https://googletest.egorspirin10.workers.dev/';
@@ -186,14 +186,15 @@
                     return null;
                 }
 
-                // Поиск пользователя по ID в столбце "id" (первый столбец)
+                // Поиск пользователя по ID (столбец A)
+                // Структура: A=id, B=username, C=balance, D=card
                 for (let i = 1; i < data.length; i++) {
                     if (data[i][0] && data[i][0].toString() === tgUser.id.toString()) {
                         return {
-                            id: data[i][0],
-                            username: data[i][1] || '',
-                            balance: data[i][2] || '',
-                            card: data[i][3] || ''
+                            id: data[i][0],           // столбец A
+                            username: data[i][1] || '', // столбец B  
+                            balance: data[i][2] || '',  // столбец C
+                            card: data[i][3] || ''      // столбец D
                         };
                     }
                 }
