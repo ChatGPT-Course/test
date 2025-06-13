@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -100,11 +99,9 @@
 
     <div id="status" class="status" style="display: none;"></div>
 
-    <a href="index.html" class="button">Перейти на страницу 1</a>
+    <a href="test1.html" class="button">Перейти на страницу 1</a>
 
     <script>
-        const WORKER_URL = 'https://googletest.egorspirin10.workers.dev/';
-
         let tgUser = null;
         let currentUserData = null;
 
@@ -153,75 +150,44 @@
             }, 3000);
         }
 
-        // Запрос к Worker API
-        async function makeRequest(endpoint, options = {}) {
+        // Получить кешированные данные пользователя
+        function getCachedUserData() {
             try {
-                const response = await fetch(`${WORKER_URL}${endpoint}`, {
-                    method: options.method || 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...options.headers
-                    },
-                    body: options.body ? JSON.stringify(options.body) : undefined
-                });
+                const cached = localStorage.getItem(`user_data_${tgUser.id}`);
+                const cacheTime = localStorage.getItem(`user_data_time_${tgUser.id}`);
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                return await response.json();
-            } catch (error) {
-                console.error('Request failed:', error);
-                throw error;
-            }
-        }
-
-        // Получить данные пользователя из таблицы
-        async function getUserData() {
-            try {
-                const result = await makeRequest('api/sheets/data');
-                const data = result.data;
-
-                if (!data || data.length <= 1) {
-                    return null;
-                }
-
-                // Поиск пользователя по ID (столбец A)
-                // Структура: A=id, B=username, C=balance, D=card
-                for (let i = 1; i < data.length; i++) {
-                    if (data[i][0] && data[i][0].toString() === tgUser.id.toString()) {
-                        return {
-                            id: data[i][0],           // столбец A
-                            username: data[i][1] || '', // столбец B  
-                            balance: data[i][2] || '',  // столбец C
-                            card: data[i][3] || ''      // столбец D
-                        };
+                if (cached && cacheTime) {
+                    const timeDiff = Date.now() - parseInt(cacheTime);
+                    // Кеш действителен 5 минут
+                    if (timeDiff < 5 * 60 * 1000) {
+                        return JSON.parse(cached);
                     }
                 }
-
                 return null;
             } catch (error) {
-                console.error('Error getting user data:', error);
+                console.error('Ошибка чтения кеша:', error);
                 return null;
             }
         }
 
-        // Загрузить данные пользователя
-        async function loadUserData() {
+        // Загрузить данные пользователя (используем кеш)
+        function loadUserData() {
             try {
-                const userData = await getUserData();
+                const cachedData = getCachedUserData();
 
-                if (userData) {
-                    currentUserData = userData;
-                    updateUI(userData);
-                    showStatus('Данные загружены', 'success');
+                if (cachedData) {
+                    console.log('Используем кешированные данные на странице 2');
+                    currentUserData = cachedData;
+                    updateUI(cachedData);
+                    showStatus('Данные загружены из кеша', 'success');
                 } else {
-                    showStatus('Пользователь не найден. Создайте его на странице 1', 'error');
+                    console.log('Кеш не найден, показываем базовые данные');
+                    showStatus('Данные не найдены. Перейдите на страницу 1', 'error');
                     updateUI({
                         id: tgUser.id,
                         username: tgUser.username || '',
-                        balance: 'Пользователь не найден',
-                        card: 'Пользователь не найден'
+                        balance: 'Нет данных',
+                        card: 'Нет данных'
                     });
                 }
 
