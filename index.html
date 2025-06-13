@@ -194,13 +194,13 @@
                     return null;
                 }
                 
-                // Поиск пользователя по ID (предполагаем что ID в первом столбце)
+                // Поиск пользователя по ID в столбце "id" (первый столбец)
                 for (let i = 1; i < data.length; i++) {
                     if (data[i][0] && data[i][0].toString() === tgUser.id.toString()) {
                         return {
                             id: data[i][0],
                             username: data[i][1] || '',
-                            balance: data[i][2] || '0',
+                            balance: data[i][2] || '',
                             card: data[i][3] || ''
                         };
                     }
@@ -269,8 +269,8 @@
 
         // Обновить интерфейс
         function updateUI(userData) {
-            document.getElementById('balance').textContent = userData.balance;
-            document.getElementById('card').textContent = userData.card || 'Пусто';
+            document.getElementById('balance').textContent = userData.balance || 'Нет данных';
+            document.getElementById('card').textContent = userData.card || 'Нет данных';
         }
 
         // Добавить запись (для спама)
