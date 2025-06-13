@@ -15,24 +15,24 @@
             background: var(--tg-theme-bg-color, #ffffff);
             color: var(--tg-theme-text-color, #000000);
         }
-        
+
         h1 {
             text-align: center;
             color: var(--tg-theme-text-color, #000000);
         }
-        
+
         .user-info {
             background: var(--tg-theme-secondary-bg-color, #f8f9fa);
             padding: 15px;
             border-radius: 8px;
             margin: 20px 0;
         }
-        
+
         .info-item {
             margin: 10px 0;
             font-size: 16px;
         }
-        
+
         .button {
             display: block;
             width: 100%;
@@ -48,32 +48,32 @@
             text-align: center;
             box-sizing: border-box;
         }
-        
+
         .button:hover {
             opacity: 0.8;
         }
-        
+
         .button:active {
             transform: scale(0.98);
         }
-        
+
         .loading {
             text-align: center;
             color: var(--tg-theme-hint-color, #999999);
         }
-        
+
         .status {
             padding: 10px;
             margin: 10px 0;
             border-radius: 5px;
             text-align: center;
         }
-        
+
         .success {
             background: #d4edda;
             color: #155724;
         }
-        
+
         .error {
             background: #f8d7da;
             color: #721c24;
@@ -82,7 +82,7 @@
 </head>
 <body>
     <h1>Страница 2</h1>
-    
+
     <div class="user-info">
         <div class="info-item">
             <strong>ID:</strong> <span id="userId">Загрузка...</span>
@@ -97,14 +97,14 @@
             <strong>Карточки:</strong> <span id="card">Загрузка...</span>
         </div>
     </div>
-    
+
     <div id="status" class="status" style="display: none;"></div>
-    
-    <a href="index..html" class="button">Перейти на страницу 1</a>
+
+    <a href="test1.html" class="button">Перейти на страницу 1</a>
 
     <script>
         const WORKER_URL = 'https://googletest.egorspirin10.workers.dev/';
-        
+
         let tgUser = null;
         let currentUserData = null;
 
@@ -114,7 +114,7 @@
                 const tg = window.Telegram.WebApp;
                 tg.ready();
                 tg.expand();
-                
+
                 if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
                     tgUser = tg.initDataUnsafe.user;
                     console.log('Telegram user:', tgUser);
@@ -134,10 +134,10 @@
                 };
                 console.log('Telegram WebApp not available, using test data');
             }
-            
+
             document.getElementById('userId').textContent = tgUser.id;
             document.getElementById('username').textContent = tgUser.username || 'Не указан';
-            
+
             loadUserData();
         }
 
@@ -147,7 +147,7 @@
             statusEl.textContent = message;
             statusEl.className = `status ${type}`;
             statusEl.style.display = 'block';
-            
+
             setTimeout(() => {
                 statusEl.style.display = 'none';
             }, 3000);
@@ -181,23 +181,23 @@
             try {
                 const result = await makeRequest('api/sheets/data');
                 const data = result.data;
-                
+
                 if (!data || data.length <= 1) {
                     return null;
                 }
-                
-                // Поиск пользователя по ID (предполагаем что ID в первом столбце)
+
+                // Поиск пользователя по ID в столбце "id" (первый столбец)
                 for (let i = 1; i < data.length; i++) {
                     if (data[i][0] && data[i][0].toString() === tgUser.id.toString()) {
                         return {
                             id: data[i][0],
                             username: data[i][1] || '',
-                            balance: data[i][2] || '0',
+                            balance: data[i][2] || '',
                             card: data[i][3] || ''
                         };
                     }
                 }
-                
+
                 return null;
             } catch (error) {
                 console.error('Error getting user data:', error);
@@ -209,25 +209,25 @@
         async function loadUserData() {
             try {
                 const userData = await getUserData();
-                
+
                 if (userData) {
                     currentUserData = userData;
                     updateUI(userData);
                     showStatus('Данные загружены', 'success');
                 } else {
-                    showStatus('Пользователь не найден', 'error');
+                    showStatus('Пользователь не найден. Создайте его на странице 1', 'error');
                     updateUI({
                         id: tgUser.id,
                         username: tgUser.username || '',
-                        balance: 'Не найден',
-                        card: 'Не найден'
+                        balance: 'Пользователь не найден',
+                        card: 'Пользователь не найден'
                     });
                 }
-                
+
             } catch (error) {
                 console.error('Error loading user data:', error);
                 showStatus('Ошибка загрузки данных', 'error');
-                
+
                 // Показываем базовые данные даже при ошибке
                 updateUI({
                     id: tgUser.id,
@@ -240,8 +240,8 @@
 
         // Обновить интерфейс
         function updateUI(userData) {
-            document.getElementById('balance').textContent = userData.balance;
-            document.getElementById('card').textContent = userData.card || 'Пусто';
+            document.getElementById('balance').textContent = userData.balance || 'Нет данных';
+            document.getElementById('card').textContent = userData.card || 'Нет данных';
         }
 
         // Инициализация при загрузке страницы
