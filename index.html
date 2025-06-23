@@ -3,495 +3,715 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Mini App - Database Test</title>
+    <title>Hockey Shootouts</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        h1, h2 {
-            color: #333;
-            text-align: center;
-        }
-        .button-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-        button {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.3s;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            color: white;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
-        .btn-success {
-            background-color: #28a745;
-            color: white;
-        }
-        .btn-success:hover {
-            background-color: #1e7e34;
-        }
-        .btn-warning {
-            background-color: #ffc107;
-            color: black;
-        }
-        .btn-warning:hover {
-            background-color: #e0a800;
-        }
-        .btn-danger {
-            background-color: #dc3545;
-            color: white;
-        }
-        .btn-danger:hover {
-            background-color: #c82333;
-        }
-        input[type="text"], input[type="url"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-bottom: 10px;
+        * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
-        #logs {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 15px;
-            height: 400px;
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #2c3e50, #34495e, #2c3e50);
+            color: white;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 80px 20px 20px;
+            position: relative;
+        }
+
+        .header-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(52, 73, 94, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .game-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e74c3c;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .user-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(231, 76, 60, 0.3);
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .avatar-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .balance-display {
+            font-size: 18px;
+            margin-bottom: 40px;
+            color: #ecf0f1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .balance-icon {
+            font-size: 20px;
+        }
+
+        .game-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 280px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-play {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn-play:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ecf0f1;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-row .btn {
+            flex: 1;
+            padding: 12px 20px;
+            font-size: 14px;
+        }
+
+        .version-info {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #2c3e50, #34495e, #2c3e50);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .loading-container {
+            text-align: center;
+            color: white;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #e74c3c;
+            animation: spin 1.5s ease-in-out infinite;
+            margin: 0 auto 20px;
+        }
+
+        .debug-panel {
+            position: fixed;
+            top: 70px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            max-width: 350px;
+            max-height: 200px;
             overflow-y: auto;
-            font-family: monospace;
+            z-index: 1000;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .support-button {
+            background: rgba(52, 152, 219, 0.8);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .support-button:hover {
+            background: rgba(52, 152, 219, 1);
+            transform: scale(1.05);
+        }
+
+        .debug-toggle {
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
             font-size: 12px;
-            white-space: pre-wrap;
+            cursor: pointer;
         }
-        #records {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 15px;
-            height: 200px;
-            overflow-y: auto;
+
+        /* Модальное окно поддержки */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
         }
-        .record-item {
-            padding: 8px;
-            margin: 5px 0;
-            background: white;
-            border-radius: 3px;
-            border-left: 4px solid #007bff;
+
+        .modal-content {
+            background: rgba(52, 73, 94, 0.95);
+            backdrop-filter: blur(15px);
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 350px;
+            max-width: 90%;
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
-        .record-date {
-            font-size: 11px;
-            color: #666;
+
+        .modal h3 {
+            color: #3498db;
+            margin-bottom: 20px;
+            font-size: 20px;
         }
+
+        .modal p {
+            margin-bottom: 25px;
+            color: #ecf0f1;
+            line-height: 1.5;
+            font-size: 16px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn-contact {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .modal-btn-contact:hover {
+            background: linear-gradient(135deg, #2980b9, #3498db);
+            transform: translateY(-2px);
+        }
+
+        .modal-btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ecf0f1;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .error-container {
+            background: rgba(231, 76, 60, 0.1);
+            border: 2px solid #e74c3c;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .error-container h2 {
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+
+        .balance-loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #e74c3c;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         .status-indicator {
             display: inline-block;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            margin-right: 10px;
+            margin-right: 8px;
         }
+
         .status-online {
-            background-color: #28a745;
+            background-color: #27ae60;
+            box-shadow: 0 0 10px rgba(39, 174, 96, 0.5);
         }
+
         .status-offline {
-            background-color: #dc3545;
+            background-color: #e74c3c;
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
         }
-        .error-details {
-            background-color: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 5px;
-            padding: 10px;
-            margin: 10px 0;
-            font-family: monospace;
-            font-size: 12px;
-        }
-        .connection-info {
-            background-color: #d1ecf1;
-            border: 1px solid #bee5eb;
-            border-radius: 5px;
-            padding: 10px;
-            margin: 10px 0;
-            font-family: monospace;
-            font-size: 12px;
-        }
+
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🤖 Telegram Mini App - Тест базы данных</h1>
+    <div class="header-panel">
+        <button class="support-button" onclick="showSupportModal()">🆘</button>
+        <div class="game-title">Hockey Shootouts</div>
+    </div>
 
-        <div class="container">
-            <h2>🔗 Настройки соединения</h2>
-            <label for="apiUrl">URL сервера API:</label>
-            <input type="url" id="apiUrl" placeholder="http://localhost:3000 или URL вашего сервера" value="">
-            <button class="btn-primary" onclick="updateApiUrl()">💾 Сохранить URL</button>
-            <div id="connectionInfo" class="connection-info" style="display: none;"></div>
+    <!-- Загрузочный экран -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <h2>Загрузка...</h2>
+        </div>
+    </div>
+
+    <div id="debugPanel" class="debug-panel">
+        <div id="debugLogs">Инициализация...</div>
+    </div>
+
+    <div id="accessCheck" class="error-container" style="display: none;">
+        <h2>❌ Доступ запрещен</h2>
+        <p>Это приложение доступно только через Telegram Mini App</p>
+        <p>Пожалуйста, откройте приложение через бота в Telegram</p>
+    </div>
+
+    <div id="mainContent" class="game-container" style="display: none;">
+        <div class="user-avatar" id="userAvatar">
+            <span id="avatarText">?</span>
         </div>
 
-        <div class="container">
-            <h2>🔗 Проверка соединений</h2>
-            <div class="button-group">
-                <button class="btn-primary" onclick="testServer()">
-                    <span id="server-status" class="status-indicator status-offline"></span>
-                    Проверить сервер
+        <div class="balance-display" id="balanceDisplay">
+            <span class="balance-icon">🏒</span>
+            <span>Клюшек: </span>
+            <span id="balanceAmount"><div class="balance-loading"></div></span>
+        </div>
+
+        <div class="game-buttons">
+            <button class="btn btn-play" onclick="playGame()">
+                Играть
+            </button>
+
+            <button class="btn btn-secondary" onclick="showProfile()">
+                Мой профиль
+            </button>
+
+            <div class="btn-row">
+                <button class="btn btn-secondary" onclick="showCraft()">
+                    Крафт
                 </button>
-                <button class="btn-primary" onclick="testDatabase()">
-                    <span id="db-status" class="status-indicator status-offline"></span>
-                    Проверить БД
+                <button class="btn btn-secondary" onclick="showShop()">
+                    Магазин
                 </button>
             </div>
         </div>
 
-        <div class="container">
-            <h2>💾 Операции с базой данных</h2>
-            <input type="text" id="messageInput" placeholder="Введите сообщение для записи в БД" maxlength="255">
-            <div class="button-group">
-                <button class="btn-success" onclick="createRecord()">➕ Создать запись</button>
-                <button class="btn-warning" onclick="readRecords()">📖 Читать записи</button>
-                <button class="btn-danger" onclick="clearRecords()">🗑️ Очистить БД</button>
+        <div class="version-info">
+            Hockey Shootouts V_1.2b
+        </div>
+    </div>
+
+    <!-- Модальное окно поддержки -->
+    <div id="supportModal" class="modal">
+        <div class="modal-content">
+            <h3>📞 Техническая поддержка</h3>
+            <p>Столкнулись с проблемой, обнаружили баг, есть предложение?<br><br>Свяжитесь с технической поддержкой!</p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-contact" onclick="openTelegramSupport()">Связаться</button>
+                <button class="modal-btn modal-btn-cancel" onclick="closeSupportModal()">Отмена</button>
             </div>
-        </div>
-
-        <div class="container">
-            <h2>📋 Записи из базы данных</h2>
-            <div id="records">Нажмите "Читать записи" для загрузки данных...</div>
-        </div>
-
-        <div class="container">
-            <h2>📝 Детальные логи операций</h2>
-            <div id="logs">Логи операций будут отображаться здесь...\n</div>
-            <button class="btn-warning" onclick="clearLogs()" style="margin-top: 10px;">🧹 Очистить логи</button>
         </div>
     </div>
 
     <script>
         let API_BASE = '';
+        let telegramUser = null;
+        let currentUser = null;
+        let debugVisible = false;
 
-        // Инициализация URL API
-        function initApiUrl() {
-            // Попробуем определить URL автоматически
-            const currentHost = window.location.host;
-            const currentProtocol = window.location.protocol;
+        // Cookie функции
+        function setCookie(name, value, days = 7) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+            addDebugLog(`🍪 Cookie установлен: ${name}=${value}`, 'info');
+        }
 
-            // Если открыто локально
-            if (currentHost.includes('localhost') || currentHost.includes('127.0.0.1')) {
-                API_BASE = `${currentProtocol}//${currentHost}`;
-            } 
-            // Если это Replit - API работает на том же домене
-            else if (currentHost.includes('replit.dev')) {
-                API_BASE = `${currentProtocol}//${currentHost}`;
-            }
-            // Если это GitHub Pages или другой статический хостинг - используем TimeWeb сервер
-            else if (currentHost.includes('github.io') || currentHost.includes('pages.dev') || currentHost.includes('netlify.app') || currentHost.includes('vercel.app')) {
-                API_BASE = 'http://46.149.67.97:3000';
-                addLog(`🌐 Определен статический хостинг, используется TimeWeb сервер`, 'info');
-            }
-            // Если это TimeWeb или другой хост
-            else {
-                // Если порт уже указан в URL, используем тот же хост
-                if (currentHost.includes(':')) {
-                    API_BASE = `${currentProtocol}//${currentHost}`;
-                } else {
-                    // Иначе пробуем порт 3000
-                    API_BASE = `${currentProtocol}//${currentHost.split(':')[0]}:3000`;
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) {
+                    const value = c.substring(nameEQ.length, c.length);
+                    addDebugLog(`🍪 Cookie получен: ${name}=${value}`, 'info');
+                    return value;
                 }
             }
-
-            document.getElementById('apiUrl').value = API_BASE;
-            addLog(`🔧 Автоматически определен API URL: ${API_BASE}`, 'info');
-            addLog(`🌍 Текущий хост: ${currentHost}`, 'debug');
-            updateConnectionInfo();
+            addDebugLog(`🍪 Cookie не найден: ${name}`, 'warning');
+            return null;
         }
 
-        function updateApiUrl() {
-            const newUrl = document.getElementById('apiUrl').value.trim();
-            if (newUrl) {
-                API_BASE = newUrl.replace(/\/$/, ''); // убираем последний слеш
-                addLog(`🔧 API URL обновлен: ${API_BASE}`, 'info');
-                updateConnectionInfo();
-                // Сразу проверим соединение
-                setTimeout(() => {
-                    testServer();
-                }, 500);
-            } else {
-                addLog('❌ Введите корректный URL сервера', 'error');
-            }
+        // Debug функции
+        function toggleDebug() {
+            debugVisible = !debugVisible;
+            document.getElementById('debugPanel').style.display = debugVisible ? 'block' : 'none';
         }
 
-        function updateConnectionInfo() {
-            const info = document.getElementById('connectionInfo');
-            const url = new URL(API_BASE);
-            info.innerHTML = `
-                <strong>Текущие настройки подключения:</strong><br>
-                🌐 Хост: ${url.hostname}<br>
-                🔌 Порт: ${url.port || (url.protocol === 'https:' ? 443 : 80)}<br>
-                🔒 Протокол: ${url.protocol}<br>
-                📡 Полный URL: ${API_BASE}
-            `;
-            info.style.display = 'block';
-        }
-
-        function addLog(message, type = 'info') {
-            const logs = document.getElementById('logs');
-            const timestamp = new Date().toLocaleString('ru-RU');
-            const logTypes = {
+        function addDebugLog(message, type = 'info') {
+            const debugLogs = document.getElementById('debugLogs');
+            const timestamp = new Date().toLocaleTimeString();
+            const icons = {
                 'success': '✅',
                 'error': '❌',
                 'info': 'ℹ️',
-                'warning': '⚠️',
-                'debug': '🔍'
+                'warning': '⚠️'
             };
-            const icon = logTypes[type] || 'ℹ️';
-            logs.textContent += `[${timestamp}] ${icon} ${message}\n`;
-            logs.scrollTop = logs.scrollHeight;
+            const icon = icons[type] || 'ℹ️';
+            debugLogs.innerHTML += `[${timestamp}] ${icon} ${message}<br>`;
+            debugLogs.scrollTop = debugLogs.scrollHeight;
         }
 
-        function addErrorDetails(error, response = null) {
-            const logs = document.getElementById('logs');
-            logs.textContent += `
-📋 ДЕТАЛИ ОШИБКИ:
-🔍 Тип ошибки: ${error.name || 'Unknown'}
-📝 Сообщение: ${error.message || 'Нет сообщения'}
-🌐 URL: ${API_BASE}
-${response ? `📊 HTTP Status: ${response.status} ${response.statusText}` : ''}
-${error.stack ? `📚 Stack trace: ${error.stack}` : ''}
-═══════════════════════════════════════════
+        // Проверка доступа через Telegram
+        function checkTelegramAccess() {
+            addDebugLog('🔍 Проверка доступа через Telegram...', 'info');
 
-`;
-            logs.scrollTop = logs.scrollHeight;
+            if (!window.Telegram || !window.Telegram.WebApp) {
+                addDebugLog('❌ Telegram WebApp API недоступен', 'error');
+                showAccessDenied();
+                return false;
+            }
+
+            const tg = window.Telegram.WebApp;
+            addDebugLog('✅ Telegram WebApp API найден', 'success');
+
+            const initDataUnsafe = tg.initDataUnsafe;
+            addDebugLog(`📱 Данные: ${JSON.stringify(initDataUnsafe)}`, 'info');
+
+            if (!initDataUnsafe || !initDataUnsafe.user) {
+                addDebugLog('❌ Данные пользователя недоступны', 'error');
+                showAccessDenied();
+                return false;
+            }
+
+            telegramUser = initDataUnsafe.user;
+            addDebugLog(`✅ Пользователь: ${telegramUser.first_name} (ID: ${telegramUser.id})`, 'success');
+
+            tg.ready();
+            tg.expand();
+
+            return true;
         }
 
-        function updateStatus(elementId, isOnline) {
-            const element = document.getElementById(elementId);
-            element.className = `status-indicator ${isOnline ? 'status-online' : 'status-offline'}`;
+        function showAccessDenied() {
+            document.getElementById('accessCheck').style.display = 'block';
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('loadingScreen').style.display = 'none';
         }
 
-        async function testServer() {
-            if (!API_BASE) {
-                addLog('❌ Сначала настройте URL сервера', 'error');
+        function showLoadingScreen() {
+            document.getElementById('loadingScreen').style.display = 'flex';
+        }
+
+        function hideLoadingScreen() {
+            document.getElementById('loadingScreen').style.display = 'none';
+        }
+
+        function showMainContent() {
+            document.getElementById('accessCheck').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'flex';
+            hideLoadingScreen();
+        }
+
+        function updateUserAvatar() {
+            if (!telegramUser) return;
+
+            const userAvatar = document.getElementById('userAvatar');
+            const avatarText = document.getElementById('avatarText');
+
+            if (telegramUser.photo_url) {
+                userAvatar.innerHTML = `<img src="${telegramUser.photo_url}" alt="Avatar" class="avatar-image">`;
+                addDebugLog(`✅ Установлено фото профиля: ${telegramUser.photo_url}`, 'success');
+            } else {
+                const firstLetter = telegramUser.first_name ? telegramUser.first_name.charAt(0).toUpperCase() : '?';
+                avatarText.textContent = firstLetter;
+                addDebugLog(`ℹ️ Используется текстовый аватар: ${firstLetter}`, 'info');
+            }
+        }
+
+        function updateBalance(balance) {
+            const balanceAmount = document.getElementById('balanceAmount');
+
+            balanceAmount.innerHTML = balance;
+
+            addDebugLog(`✅ Баланс обновлен: ${balance}`, 'success');
+        }
+
+        function showBalanceLoading() {
+            const balanceAmount = document.getElementById('balanceAmount');
+
+            balanceAmount.innerHTML = '<div class="balance-loading"></div>';
+        }
+
+        function initApiUrl() {
+            if (window.location.protocol === 'https:') {
+                API_BASE = window.location.origin;
+            } else {
+                API_BASE = `${window.location.protocol}//${window.location.hostname}:3004`;
+            }
+            addDebugLog(`🌐 API URL: ${API_BASE}`, 'info');
+        }
+
+        async function checkOrCreateUser() {
+            if (!telegramUser) {
+                addDebugLog('❌ Данные пользователя недоступны', 'error');
                 return;
             }
 
-            addLog(`🔄 Проверка соединения с сервером: ${API_BASE}/api/test`, 'info');
+            showBalanceLoading();
+            addDebugLog(`🔄 Проверка пользователя ID: ${telegramUser.id}`, 'info');
+
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-                const response = await fetch(`${API_BASE}/api/test`, {
-                    signal: controller.signal,
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                clearTimeout(timeoutId);
-
+                const response = await fetch(`${API_BASE}/api/user/${telegramUser.id}`);
                 const data = await response.json();
 
                 if (response.ok) {
-                    addLog(`✅ Сервер отвечает: ${data.message}`, 'success');
-                    addLog(`📊 Данные сервера: Порт ${data.port}, Окружение: ${data.environment}`, 'info');
-                    updateStatus('server-status', true);
-                } else {
-                    addLog(`❌ Ошибка сервера (${response.status}): ${data.message || 'Неизвестная ошибка'}`, 'error');
-                    addErrorDetails(new Error(`HTTP ${response.status}`), response);
-                    updateStatus('server-status', false);
-                }
-            } catch (error) {
-                if (error.name === 'AbortError') {
-                    addLog('❌ Таймаут соединения с сервером (10 сек)', 'error');
-                } else {
-                    addLog(`❌ Ошибка соединения с сервером: ${error.message}`, 'error');
-                }
-                addErrorDetails(error);
-                updateStatus('server-status', false);
-            }
-        }
-
-        async function testDatabase() {
-            if (!API_BASE) {
-                addLog('❌ Сначала настройте URL сервера', 'error');
-                return;
-            }
-
-            addLog(`🔄 Проверка соединения с базой данных: ${API_BASE}/api/test-db`, 'info');
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-                const response = await fetch(`${API_BASE}/api/test-db`, {
-                    signal: controller.signal
-                });
-
-                clearTimeout(timeoutId);
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    addLog(`✅ База данных подключена! Время: ${data.current_time}`, 'success');
-                    addLog(`📊 Версия PostgreSQL: ${data.db_version}`, 'info');
-                    if (data.connection_info) {
-                        addLog(`🔗 Подключение: ${data.connection_info.user}@${data.connection_info.host}:${data.connection_info.port}/${data.connection_info.database}`, 'info');
+                    if (data.user) {
+                        addDebugLog(`✅ Пользователь найден. Баланс: ${data.user.balance}`, 'success');
+                        currentUser = data.user;
+                        updateBalance(data.user.balance);
+                        // Сохраняем ID в cookie
+                        setCookie('hockey_user_id', data.user.id);
+                    } else {
+                        addDebugLog(`ℹ️ Новый пользователь. Создание...`, 'info');
+                        await createUser();
                     }
-                    updateStatus('db-status', true);
                 } else {
-                    addLog(`❌ Ошибка БД (${response.status}): ${data.message}`, 'error');
-                    if (data.code) addLog(`🔍 Код ошибки PostgreSQL: ${data.code}`, 'debug');
-                    if (data.detail) addLog(`📝 Детали: ${data.detail}`, 'debug');
-                    addErrorDetails(new Error(`Database error: ${data.message}`), response);
-                    updateStatus('db-status', false);
+                    addDebugLog(`❌ ${data.message}`, 'error');
                 }
             } catch (error) {
-                if (error.name === 'AbortError') {
-                    addLog('❌ Таймаут соединения с БД (15 сек)', 'error');
-                } else {
-                    addLog(`❌ Ошибка соединения с БД: ${error.message}`, 'error');
-                }
-                addErrorDetails(error);
-                updateStatus('db-status', false);
+                addDebugLog(`❌ Ошибка: ${error.message}`, 'error');
             }
         }
 
-        async function createRecord() {
-            const messageInput = document.getElementById('messageInput');
-            const message = messageInput.value.trim();
+        async function createUser() {
+            if (!telegramUser) return;
 
-            if (!message) {
-                addLog('⚠️ Введите сообщение для создания записи', 'warning');
-                return;
-            }
+            addDebugLog(`🔄 Создание пользователя...`, 'info');
 
-            addLog(`🔄 Создание записи: "${message}"`, 'info');
             try {
-                const response = await fetch(`${API_BASE}/api/records`, {
+                const userData = {
+                    id: telegramUser.id,
+                    first_name: telegramUser.first_name,
+                    last_name: telegramUser.last_name || null,
+                    username: telegramUser.username || null,
+                    language_code: telegramUser.language_code || 'ru',
+                    is_premium: telegramUser.is_premium || false,
+                    photo_url: telegramUser.photo_url || null,
+                    allows_write_to_pm: telegramUser.allows_write_to_pm || false
+                };
+
+                const response = await fetch(`${API_BASE}/api/user`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ message })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    addLog(`✅ Запись создана! ID: ${data.record.id}`, 'success');
-                    messageInput.value = '';
-                    await readRecords(); // Автоматически обновляем список
+                    addDebugLog(`✅ ${data.message} Баланс: ${data.user.balance}`, 'success');
+                    currentUser = data.user;
+                    updateBalance(data.user.balance);
+                    // Сохраняем ID в cookie
+                    setCookie('hockey_user_id', data.user.id);
                 } else {
-                    addLog(`❌ Ошибка создания записи: ${data.message}`, 'error');
-                    if (data.code) addLog(`🔍 Код ошибки: ${data.code}`, 'debug');
-                    addErrorDetails(new Error(`Create record error: ${data.message}`), response);
+                    addDebugLog(`❌ ${data.message}`, 'error');
                 }
             } catch (error) {
-                addLog(`❌ Ошибка запроса: ${error.message}`, 'error');
-                addErrorDetails(error);
+                addDebugLog(`❌ Ошибка создания: ${error.message}`, 'error');
             }
         }
 
-        async function readRecords() {
-            addLog('🔄 Загрузка записей из базы данных...', 'info');
-            try {
-                const response = await fetch(`${API_BASE}/api/records`);
-                const data = await response.json();
+        // Функции модального окна поддержки
+        function showSupportModal() {
+            addDebugLog('📞 Открытие модального окна поддержки', 'info');
+            document.getElementById('supportModal').style.display = 'block';
+        }
 
-                if (response.ok) {
-                    displayRecords(data.records);
-                    addLog(`✅ Загружено записей: ${data.records.length}`, 'success');
-                } else {
-                    addLog(`❌ Ошибка чтения записей: ${data.message}`, 'error');
-                    if (data.code) addLog(`🔍 Код ошибки: ${data.code}`, 'debug');
-                    addErrorDetails(new Error(`Read records error: ${data.message}`), response);
-                }
-            } catch (error) {
-                addLog(`❌ Ошибка запроса: ${error.message}`, 'error');
-                addErrorDetails(error);
+        function closeSupportModal() {
+            addDebugLog('📞 Закрытие модального окна поддержки', 'info');
+            document.getElementById('supportModal').style.display = 'none';
+        }
+
+        function openTelegramSupport() {
+            addDebugLog('📞 Открытие Telegram поддержки', 'info');
+            window.open('https://t.me/pidodesigned0', '_blank');
+            closeSupportModal();
+        }
+
+        // Закрытие модального окна при клике вне его
+        window.onclick = function(event) {
+            const modal = document.getElementById('supportModal');
+            if (event.target === modal) {
+                closeSupportModal();
             }
         }
 
-        function displayRecords(records) {
-            const recordsDiv = document.getElementById('records');
+        // Функции кнопок
+        function playGame() {
+            addDebugLog('🎮 Переход к игре', 'info');
+            window.location.href = 'game.html';
+        }
 
-            if (records.length === 0) {
-                recordsDiv.innerHTML = '<p style="text-align: center; color: #666;">База данных пуста</p>';
+        function showProfile() {
+            addDebugLog('👤 Переход на страницу профиля', 'info');
+            window.location.href = 'profile.html';
+        }
+
+        function showCraft() {
+            addDebugLog('🔨 Переход на страницу крафта', 'info');
+            window.location.href = 'craft.html';
+        }
+
+        function showShop() {
+            addDebugLog('🛒 Переход в магазин', 'info');
+            window.location.href = 'shop.html';
+        }
+
+        // Инициализация приложения
+        window.addEventListener('load', async () => {
+            addDebugLog('🚀 Запуск приложения...', 'info');
+
+            showLoadingScreen();
+
+            if (!checkTelegramAccess()) {
                 return;
             }
 
-            let html = '';
-            records.forEach(record => {
-                const date = new Date(record.created_at).toLocaleString('ru-RU');
-                html += `
-                    <div class="record-item">
-                        <strong>ID ${record.id}:</strong> ${record.message}
-                        <div class="record-date">${date}</div>
-                    </div>
-                `;
-            });
-
-            recordsDiv.innerHTML = html;
-        }
-
-        async function clearRecords() {
-            if (!confirm('Вы уверены, что хотите удалить все записи из базы данных?')) {
-                return;
-            }
-
-            addLog('🔄 Удаление всех записей из базы данных...', 'warning');
-            try {
-                const response = await fetch(`${API_BASE}/api/records`, {
-                    method: 'DELETE'
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    addLog(`✅ Удалено записей: ${data.deleted_count || 'все'}`, 'success');
-                    await readRecords(); // Обновляем отображение
-                } else {
-                    addLog(`❌ Ошибка удаления записей: ${data.message}`, 'error');
-                    if (data.code) addLog(`🔍 Код ошибки: ${data.code}`, 'debug');
-                    addErrorDetails(new Error(`Delete records error: ${data.message}`), response);
-                }
-            } catch (error) {
-                addLog(`❌ Ошибка запроса: ${error.message}`, 'error');
-                addErrorDetails(error);
-            }
-        }
-
-        function clearLogs() {
-            document.getElementById('logs').textContent = 'Логи очищены...\n';
-        }
-
-        // Автоматическая инициализация при загрузке страницы
-        window.addEventListener('load', () => {
-            addLog('🚀 Приложение загружено. Инициализация...', 'info');
+            showMainContent();
+            updateUserAvatar();
             initApiUrl();
 
-            setTimeout(() => {
-                testServer();
-                setTimeout(() => {
-                    testDatabase();
-                }, 1000);
+            // Проверяем сервер и создаем пользователя
+            setTimeout(async () => {
+                try {
+                    const response = await fetch(`${API_BASE}/api/test`);
+                    if (response.ok) {
+                        addDebugLog('✅ Сервер доступен', 'success');
+                        await checkOrCreateUser();
+                    } else {
+                        addDebugLog('❌ Сервер недоступен', 'error');
+                    }
+                } catch (error) {
+                    addDebugLog(`❌ Ошибка сервера: ${error.message}`, 'error');
+                }
+
+                hideLoadingScreen();
             }, 500);
         });
     </script>
