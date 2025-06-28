@@ -2,718 +2,151 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hockey Shootouts</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Открытие кейса</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
+            background: linear-gradient(135deg, #2c3e50, #34495e, #2c3e50);
+            color: white;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #2c3e50, #34495e, #2c3e50);
-            color: white;
-            min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
+            margin: 0; min-height: 100vh;
         }
-
-        .game-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 80px 20px 20px;
-            position: relative;
+        .header {
+            background: rgba(52,73,94,0.9);
+            padding: 18px 20px;
+            display: flex; align-items: center; justify-content: space-between;
         }
-
-        .header-panel {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(52, 73, 94, 0.9);
-            backdrop-filter: blur(10px);
-            padding: 15px 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .game-title { font-size: 22px; font-weight: bold; color: #e74c3c;}
+        .balance-block {
+            background: rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 16px;
+            font-weight: bold; display: flex; align-items: center; gap: 8px;
+            border: 1.5px solid rgba(255,255,255,0.1);
         }
-
-        .game-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #e74c3c;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        .main {
+            display: flex; flex-direction: column; align-items: center;
+            margin-top: 80px;
         }
-
-        .user-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            font-weight: bold;
-            color: white;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px rgba(231, 76, 60, 0.3);
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            overflow: hidden;
+        .case-btn {
+            background: linear-gradient(135deg,#f39c12,#e67e22);
+            color: white; font-size: 22px; font-weight: bold;
+            border: none; border-radius: 18px; padding: 16px 44px;
+            cursor: pointer; margin-top: 45px; margin-bottom: 20px;
+            transition: background 0.2s;
         }
-
-        .avatar-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 50%;
-        }
-
-        .balance-display {
-            font-size: 18px;
-            margin-bottom: 40px;
-            color: #ecf0f1;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .balance-icon {
-            font-size: 20px;
-        }
-
-        .game-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            width: 100%;
-            max-width: 280px;
-        }
-
-        .btn {
-            padding: 15px 30px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            text-decoration: none;
-            display: block;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-play {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
-            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
-        }
-
-        .btn-play:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: #ecf0f1;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .btn-row {
-            display: flex;
-            gap: 15px;
-        }
-
-        .btn-row .btn {
-            flex: 1;
-            padding: 12px 20px;
-            font-size: 14px;
-        }
-
-        .version-info {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 14px;
-            text-align: center;
-        }
-
-        .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, #2c3e50, #34495e, #2c3e50);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-        }
-
-        .loading-container {
-            text-align: center;
-            color: white;
-        }
-
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #e74c3c;
-            animation: spin 1.5s ease-in-out infinite;
-            margin: 0 auto 20px;
-        }
-
-        .debug-panel {
-            position: fixed;
-            top: 70px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.9);
-            color: #00ff00;
-            padding: 10px;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 10px;
-            max-width: 350px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
+        .case-btn:active { background: linear-gradient(135deg,#e67e22,#f39c12);}
+        .case-result {
+            background: rgba(255,255,255,0.14); border-radius: 15px;
+            margin-top: 40px; text-align: center;
+            padding: 25px 20px; min-width: 220px;
+            border: 3px solid #f39c12;
             display: none;
-            backdrop-filter: blur(10px);
         }
-
-        .support-button {
-            background: rgba(52, 152, 219, 0.8);
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .support-button:hover {
-            background: rgba(52, 152, 219, 1);
-            transform: scale(1.05);
-        }
-
-        .debug-toggle {
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        /* Модальное окно поддержки */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            background: rgba(52, 73, 94, 0.95);
-            backdrop-filter: blur(15px);
-            margin: 15% auto;
-            padding: 30px;
-            border-radius: 15px;
-            width: 350px;
-            max-width: 90%;
-            text-align: center;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-
-        .modal h3 {
-            color: #3498db;
-            margin-bottom: 20px;
-            font-size: 20px;
-        }
-
-        .modal p {
-            margin-bottom: 25px;
-            color: #ecf0f1;
-            line-height: 1.5;
-            font-size: 16px;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
-
-        .modal-btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .modal-btn-contact {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
-        }
-
-        .modal-btn-contact:hover {
-            background: linear-gradient(135deg, #2980b9, #3498db);
-            transform: translateY(-2px);
-        }
-
-        .modal-btn-cancel {
-            background: rgba(255, 255, 255, 0.1);
-            color: #ecf0f1;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .modal-btn-cancel:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .error-container {
-            background: rgba(231, 76, 60, 0.1);
-            border: 2px solid #e74c3c;
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
-            margin: 20px;
-            backdrop-filter: blur(10px);
-        }
-
-        .error-container h2 {
-            color: #e74c3c;
-            margin-bottom: 15px;
-        }
-
-        .balance-loading {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #e74c3c;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .status-indicator {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-
-        .status-online {
-            background-color: #27ae60;
-            box-shadow: 0 0 10px rgba(39, 174, 96, 0.5);
-        }
-
-        .status-offline {
-            background-color: #e74c3c;
-            box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
-        }
-
+        .case-result img { width: 88px; height: 88px; border-radius: 50%; margin-bottom: 12px;}
+        .case-result .name { font-size: 20px; font-weight: bold; margin-bottom: 10px;}
+        .case-result .rarity { font-size: 15px; font-weight: 600;}
+        .loading { margin-top:60px; font-size:18px;}
+        .err { color: #e74c3c; font-size:18px; margin-top:30px;}
     </style>
 </head>
 <body>
-    <div class="header-panel">
-        <button class="support-button" onclick="showSupportModal()">🆘</button>
+    <div class="header">
         <div class="game-title">Hockey Shootouts</div>
-    </div>
-
-    <!-- Загрузочный экран -->
-    <div id="loadingScreen" class="loading-screen">
-        <div class="loading-container">
-            <div class="loading-spinner"></div>
-            <h2>Загрузка...</h2>
+        <div class="balance-block">
+            <span>🏒</span>
+            <span id="balance">...</span>
+            <span>клюшек</span>
         </div>
     </div>
-
-    <div id="debugPanel" class="debug-panel">
-        <div id="debugLogs">Инициализация...</div>
+    <div class="main">
+        <button class="case-btn" id="openBtn" onclick="openCase()" disabled>Открыть кейс</button>
+        <div class="case-result" id="caseResult">
+            <img id="caseImg" src="" alt="">
+            <div class="name" id="caseName"></div>
+            <div class="rarity" id="caseRarity"></div>
+        </div>
+        <div class="loading" id="loading">Загрузка...</div>
+        <div class="err" id="err"></div>
     </div>
-
-    <div id="accessCheck" class="error-container" style="display: none;">
-        <h2>❌ Доступ запрещен</h2>
-        <p>Это приложение доступно только через Telegram Mini App</p>
-        <p>Пожалуйста, откройте приложение через бота в Telegram</p>
-    </div>
-
-    <div id="mainContent" class="game-container" style="display: none;">
-        <div class="user-avatar" id="userAvatar">
-            <span id="avatarText">?</span>
-        </div>
-
-        <div class="balance-display" id="balanceDisplay">
-            <span class="balance-icon">🏒</span>
-            <span>Клюшек: </span>
-            <span id="balanceAmount"><div class="balance-loading"></div></span>
-        </div>
-
-        <div class="game-buttons">
-            <button class="btn btn-play" onclick="playGame()">
-                Играть
-            </button>
-
-            <button class="btn btn-secondary" onclick="showProfile()">
-                Мой профиль
-            </button>
-
-            <div class="btn-row">
-                <button class="btn btn-secondary" onclick="showCraft()">
-                    Крафт
-                </button>
-                <button class="btn btn-secondary" onclick="showShop()">
-                    Магазин
-                </button>
-            </div>
-        </div>
-
-        <div class="version-info">
-            Hockey Shootouts V_1.2b
-        </div>
-    </div>
-
-    <!-- Модальное окно поддержки -->
-    <div id="supportModal" class="modal">
-        <div class="modal-content">
-            <h3>📞 Техническая поддержка</h3>
-            <p>Столкнулись с проблемой, обнаружили баг, есть предложение?<br><br>Свяжитесь с технической поддержкой!</p>
-            <div class="modal-buttons">
-                <button class="modal-btn modal-btn-contact" onclick="openTelegramSupport()">Связаться</button>
-                <button class="modal-btn modal-btn-cancel" onclick="closeSupportModal()">Отмена</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        let API_BASE = '';
-        let telegramUser = null;
-        let currentUser = null;
-        let debugVisible = false;
-
-        // Cookie функции
-        function setCookie(name, value, days = 7) {
-            const expires = new Date();
-            expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
-            document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
-            addDebugLog(`🍪 Cookie установлен: ${name}=${value}`, 'info');
-        }
+        // --- Настройки и массивы ---
+        let API_BASE = window.location.origin;
+        const casePrice = 30;
+        const casePool = [
+            { name: 'Грицюк', rarity: 'Эпический', rarityKey: 'epic' },
+            { name: 'Барулин', rarity: 'Сверхредкий', rarityKey: 'superrare' },
+            { name: 'Сериков', rarity: 'Редкий', rarityKey: 'rare' },
+            { name: 'Мамин', rarity: 'Эпический', rarityKey: 'epic' },
+            { name: 'Дыняк', rarity: 'Сверхредкий', rarityKey: 'superrare' }
+        ];
 
         function getCookie(name) {
-            const nameEQ = name + "=";
-            const ca = document.cookie.split(';');
-            for(let i = 0; i < ca.length; i++) {
-                let c = ca[i];
-                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-                if (c.indexOf(nameEQ) == 0) {
-                    const value = c.substring(nameEQ.length, c.length);
-                    addDebugLog(`🍪 Cookie получен: ${name}=${value}`, 'info');
-                    return value;
-                }
-            }
-            addDebugLog(`🍪 Cookie не найден: ${name}`, 'warning');
-            return null;
+            let m = document.cookie.match('(?:^|; )' + name.replace(/([\\.$?*|{}()\\[\\]\\\\\\/\\+^])/g, '\\$1') + '=([^;]*)');
+            return m ? decodeURIComponent(m[1]) : undefined;
         }
 
-        // Debug функции
-        function toggleDebug() {
-            debugVisible = !debugVisible;
-            document.getElementById('debugPanel').style.display = debugVisible ? 'block' : 'none';
-        }
+        let userId = null, balance = 0;
 
-        function addDebugLog(message, type = 'info') {
-            const debugLogs = document.getElementById('debugLogs');
-            const timestamp = new Date().toLocaleTimeString();
-            const icons = {
-                'success': '✅',
-                'error': '❌',
-                'info': 'ℹ️',
-                'warning': '⚠️'
-            };
-            const icon = icons[type] || 'ℹ️';
-            debugLogs.innerHTML += `[${timestamp}] ${icon} ${message}<br>`;
-            debugLogs.scrollTop = debugLogs.scrollHeight;
-        }
-
-        // Проверка доступа через Telegram
-        function checkTelegramAccess() {
-            addDebugLog('🔍 Проверка доступа через Telegram...', 'info');
-
-            if (!window.Telegram || !window.Telegram.WebApp) {
-                addDebugLog('❌ Telegram WebApp API недоступен', 'error');
-                showAccessDenied();
-                return false;
-            }
-
-            const tg = window.Telegram.WebApp;
-            addDebugLog('✅ Telegram WebApp API найден', 'success');
-
-            const initDataUnsafe = tg.initDataUnsafe;
-            addDebugLog(`📱 Данные: ${JSON.stringify(initDataUnsafe)}`, 'info');
-
-            if (!initDataUnsafe || !initDataUnsafe.user) {
-                addDebugLog('❌ Данные пользователя недоступны', 'error');
-                showAccessDenied();
-                return false;
-            }
-
-            telegramUser = initDataUnsafe.user;
-            addDebugLog(`✅ Пользователь: ${telegramUser.first_name} (ID: ${telegramUser.id})`, 'success');
-
-            tg.ready();
-            tg.expand();
-
-            return true;
-        }
-
-        function showAccessDenied() {
-            document.getElementById('accessCheck').style.display = 'block';
-            document.getElementById('mainContent').style.display = 'none';
-            document.getElementById('loadingScreen').style.display = 'none';
-        }
-
-        function showLoadingScreen() {
-            document.getElementById('loadingScreen').style.display = 'flex';
-        }
-
-        function hideLoadingScreen() {
-            document.getElementById('loadingScreen').style.display = 'none';
-        }
-
-        function showMainContent() {
-            document.getElementById('accessCheck').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'flex';
-            hideLoadingScreen();
-        }
-
-        function updateUserAvatar() {
-            if (!telegramUser) return;
-
-            const userAvatar = document.getElementById('userAvatar');
-            const avatarText = document.getElementById('avatarText');
-
-            if (telegramUser.photo_url) {
-                userAvatar.innerHTML = `<img src="${telegramUser.photo_url}" alt="Avatar" class="avatar-image">`;
-                addDebugLog(`✅ Установлено фото профиля: ${telegramUser.photo_url}`, 'success');
-            } else {
-                const firstLetter = telegramUser.first_name ? telegramUser.first_name.charAt(0).toUpperCase() : '?';
-                avatarText.textContent = firstLetter;
-                addDebugLog(`ℹ️ Используется текстовый аватар: ${firstLetter}`, 'info');
+        // --- Получить данные пользователя ---
+        async function fetchUser() {
+            userId = getCookie('hockey_user_id');
+            if (!userId) return showError('Нет ID пользователя в cookie');
+            try {
+                const res = await fetch(`${API_BASE}/api/user/${userId}`);
+                if (!res.ok) throw new Error('Ошибка загрузки');
+                const data = await res.json();
+                if (!data.user) throw new Error('Пользователь не найден');
+                balance = data.user.balance;
+                document.getElementById('balance').textContent = balance;
+                document.getElementById('openBtn').disabled = balance < casePrice;
+                document.getElementById('loading').style.display = 'none';
+            } catch(e) {
+                showError(e.message);
             }
         }
 
-        function updateBalance(balance) {
-            const balanceAmount = document.getElementById('balanceAmount');
-
-            balanceAmount.innerHTML = balance;
-
-            addDebugLog(`✅ Баланс обновлен: ${balance}`, 'success');
+        function showError(msg) {
+            document.getElementById('err').textContent = msg;
+            document.getElementById('loading').style.display = 'none';
         }
 
-        function showBalanceLoading() {
-            const balanceAmount = document.getElementById('balanceAmount');
-
-            balanceAmount.innerHTML = '<div class="balance-loading"></div>';
-        }
-
-        function initApiUrl() {
-            if (window.location.protocol === 'https:') {
-                API_BASE = window.location.origin;
-            } else {
-                API_BASE = `${window.location.protocol}//${window.location.hostname}:3004`;
-            }
-            addDebugLog(`🌐 API URL: ${API_BASE}`, 'info');
-        }
-
-        async function checkOrCreateUser() {
-            if (!telegramUser) {
-                addDebugLog('❌ Данные пользователя недоступны', 'error');
+        // --- Открытие кейса ---
+        async function openCase() {
+            document.getElementById('err').textContent = '';
+            if (balance < casePrice) {
+                showError('Недостаточно клюшек!');
                 return;
             }
-
-            showBalanceLoading();
-            addDebugLog(`🔄 Проверка пользователя ID: ${telegramUser.id}`, 'info');
-
+            document.getElementById('openBtn').disabled = true;
+            // Выбор приза (можно заменить на серверную логику)
+            const prize = casePool[Math.floor(Math.random() * casePool.length)];
+            // Обновить баланс (обычно на сервере)
             try {
-                const response = await fetch(`${API_BASE}/api/user/${telegramUser.id}`);
-                const data = await response.json();
-
-                if (response.ok) {
-                    if (data.user) {
-                        addDebugLog(`✅ Пользователь найден. Баланс: ${data.user.balance}`, 'success');
-                        currentUser = data.user;
-                        updateBalance(data.user.balance);
-                        // Сохраняем ID в cookie
-                        setCookie('hockey_user_id', data.user.id);
-                    } else {
-                        addDebugLog(`ℹ️ Новый пользователь. Создание...`, 'info');
-                        await createUser();
-                    }
-                } else {
-                    addDebugLog(`❌ ${data.message}`, 'error');
-                }
-            } catch (error) {
-                addDebugLog(`❌ Ошибка: ${error.message}`, 'error');
-            }
-        }
-
-        async function createUser() {
-            if (!telegramUser) return;
-
-            addDebugLog(`🔄 Создание пользователя...`, 'info');
-
-            try {
-                const userData = {
-                    id: telegramUser.id,
-                    first_name: telegramUser.first_name,
-                    last_name: telegramUser.last_name || null,
-                    username: telegramUser.username || null,
-                    language_code: telegramUser.language_code || 'ru',
-                    is_premium: telegramUser.is_premium || false,
-                    photo_url: telegramUser.photo_url || null,
-                    allows_write_to_pm: telegramUser.allows_write_to_pm || false
-                };
-
-                const response = await fetch(`${API_BASE}/api/user`, {
+                // Списать клюшки (примерно, можно заменить на POST на сервер)
+                const res = await fetch(`${API_BASE}/api/user/${userId}/open-case`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(userData)
+                    body: JSON.stringify({ price: casePrice, prize: prize.name })
                 });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    addDebugLog(`✅ ${data.message} Баланс: ${data.user.balance}`, 'success');
-                    currentUser = data.user;
-                    updateBalance(data.user.balance);
-                    // Сохраняем ID в cookie
-                    setCookie('hockey_user_id', data.user.id);
-                } else {
-                    addDebugLog(`❌ ${data.message}`, 'error');
-                }
-            } catch (error) {
-                addDebugLog(`❌ Ошибка создания: ${error.message}`, 'error');
-            }
-        }
-
-        // Функции модального окна поддержки
-        function showSupportModal() {
-            addDebugLog('📞 Открытие модального окна поддержки', 'info');
-            document.getElementById('supportModal').style.display = 'block';
-        }
-
-        function closeSupportModal() {
-            addDebugLog('📞 Закрытие модального окна поддержки', 'info');
-            document.getElementById('supportModal').style.display = 'none';
-        }
-
-        function openTelegramSupport() {
-            addDebugLog('📞 Открытие Telegram поддержки', 'info');
-            window.open('https://t.me/pidodesigned0', '_blank');
-            closeSupportModal();
-        }
-
-        // Закрытие модального окна при клике вне его
-        window.onclick = function(event) {
-            const modal = document.getElementById('supportModal');
-            if (event.target === modal) {
-                closeSupportModal();
-            }
-        }
-
-        // Функции кнопок
-        function playGame() {
-            addDebugLog('🎮 Переход к игре', 'info');
-            window.location.href = 'game.html';
-        }
-
-        function showProfile() {
-            addDebugLog('👤 Переход на страницу профиля', 'info');
-            window.location.href = 'profile.html';
-        }
-
-        function showCraft() {
-            addDebugLog('🔨 Переход на страницу крафта', 'info');
-            window.location.href = 'craft.html';
-        }
-
-        function showShop() {
-            addDebugLog('🛒 Переход в магазин', 'info');
-            window.location.href = 'shop.html';
-        }
-
-        // Инициализация приложения
-        window.addEventListener('load', async () => {
-            addDebugLog('🚀 Запуск приложения...', 'info');
-
-            showLoadingScreen();
-
-            if (!checkTelegramAccess()) {
+                const data = await res.json();
+                if (!res.ok || !data.success) throw new Error(data.message || 'Ошибка сервера');
+                balance = data.user.balance;
+                document.getElementById('balance').textContent = balance;
+            } catch(e) {
+                showError('Ошибка открытия: ' + e.message);
                 return;
             }
+            showPrize(prize);
+            document.getElementById('openBtn').disabled = balance < casePrice;
+        }
 
-            showMainContent();
-            updateUserAvatar();
-            initApiUrl();
+        // --- Показать приз ---
+        function showPrize(card) {
+            document.getElementById('caseResult').style.display = 'block';
+            document.getElementById('caseImg').src = `https://raw.githubusercontent.com/ChatGPT-Course/Xokkey/main/avatar/${card.name}.jpg`;
+            document.getElementById('caseName').textContent = card.name;
+            document.getElementById('caseRarity').textContent = card.rarity;
+        }
 
-            // Проверяем сервер и создаем пользователя
-            setTimeout(async () => {
-                try {
-                    const response = await fetch(`${API_BASE}/api/test`);
-                    if (response.ok) {
-                        addDebugLog('✅ Сервер доступен', 'success');
-                        await checkOrCreateUser();
-                    } else {
-                        addDebugLog('❌ Сервер недоступен', 'error');
-                    }
-                } catch (error) {
-                    addDebugLog(`❌ Ошибка сервера: ${error.message}`, 'error');
-                }
-
-                hideLoadingScreen();
-            }, 500);
-        });
+        window.onload = fetchUser;
     </script>
 </body>
 </html>
