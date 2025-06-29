@@ -5,28 +5,15 @@
   <title>Бесплатный кейс — Hockey Shootouts</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    :root {
-      --accent: #f39c12;
-      --accent-dark: #e67e22;
-      --bg-start: #232a37;
-      --bg-end: #34495e;
-    }
     body {
-      background: linear-gradient(135deg, var(--bg-start), var(--bg-end) 80%, var(--bg-start) 100%);
+      background: linear-gradient(135deg, #232a37, #34495e 80%, #232a37 100%);
       color: #fff;
       font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
       margin: 0; min-height: 100vh;
-      -webkit-tap-highlight-color: transparent;
-      animation: pagefade .6s ease both;
-    }
-    @keyframes pagefade {
-      from { opacity: 0; }
-      to { opacity: 1; }
     }
     .header-panel {
       position: fixed; left: 0; top: 0; right: 0; z-index: 100;
-      background: rgba(52, 73, 94, 0.75);
-      backdrop-filter: blur(8px);
+      background: rgba(52, 73, 94, 0.97);
       padding: 17px 18px;
       display: flex; align-items: center; justify-content: flex-start;
       box-shadow: 0 2px 18px rgba(0,0,0,0.28);
@@ -46,12 +33,6 @@
       border-radius: 20px; box-shadow: 0 2px 24px #0002;
       padding: 33px 22px 18px 22px;
       display: flex; flex-direction: column; align-items: center;
-      animation: fadeup .7s ease both;
-    }
-    @keyframes fadeup {
-      0% { opacity: 0; transform: translateY(20px) scale(.96); }
-      60% { opacity: 1; transform: translateY(0) scale(1.03); }
-      100% { opacity: 1; transform: translateY(0) scale(1); }
     }
     .case-image {
       width: 105px; height: 105px; margin-bottom: 10px;
@@ -75,58 +56,28 @@
     .dot-mythic { background: linear-gradient(135deg,#e74c3c,#f85c77);}
     .dot-legendary { background: linear-gradient(135deg,#ffe57a,#f39c12);}
     .open-btn {
-      margin: 32px 0 8px 0; background: linear-gradient(135deg,var(--accent),var(--accent-dark));
+      margin: 32px 0 8px 0; background: linear-gradient(135deg,#f39c12,#e67e22);
       color: #fff; border: none; font-size: 20px; font-weight: 700; border-radius: 22px;
-      padding: 15px 44px; cursor: pointer;
-      transition: transform .18s, box-shadow .18s, background .18s;
+      padding: 15px 44px; cursor: pointer; transition: background 0.18s;
       box-shadow: 0 6px 24px #f39c1270;
-      text-shadow: 0 1px 2px #000;
     }
-    .open-btn:hover:not([disabled]) {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 28px #f39c1277;
-    }
-    .open-btn:active {
-      background: linear-gradient(135deg,var(--accent-dark),var(--accent));
-      transform: translateY(1px);
-    }
-    .open-btn:focus-visible {
-      outline: 2px solid #fff5;
-      outline-offset: 2px;
-    }
+    .open-btn:active { background: linear-gradient(135deg,#e67e22,#f39c12);}
     .open-btn[disabled] { opacity: .6; cursor: not-allowed;}
-    .open-btn:not([disabled]) {
-      animation: btnpulse 2.4s infinite ease-in-out;
-    }
-    @keyframes btnpulse {
-      0%,100% { box-shadow: 0 6px 24px #f39c1270; }
-      50% { box-shadow: 0 6px 34px #f39c12aa; }
-    }
     .timer {margin-top: 15px; color: #ffe080; font-size: 18px;}
     /* Модалка */
     .modal-bg {
       position: fixed; left:0; top:0; width:100vw; height:100vh;
       z-index: 9999; background: rgba(0,0,0,0.88);
       display: none; justify-content: center; align-items: center;
-      opacity: 0; pointer-events: none;
-      transition: opacity .2s;
-      backdrop-filter: blur(3px);
+      transition: opacity .18s;
     }
-    .modal-bg.active {
-      display: flex; opacity: 1; pointer-events: auto;
-    }
+    .modal-bg.active { display: flex;}
     .case-modal-content {
       background: #232a37;
       border-radius: 22px; padding: 44px 26px 36px 26px;
-      min-width: 290px; min-height: 210px; box-shadow: 0 8px 44px rgba(0,0,0,0.5);
+      min-width: 290px; min-height: 210px; box-shadow: 0 8px 44px #1118;
       display: flex; flex-direction: column; align-items: center; position: relative;
       overflow: visible;
-      transform: scale(.85);
-      opacity: 0;
-      transition: transform .3s cubic-bezier(.4,1,.6,1), opacity .3s;
-    }
-    .modal-bg.active .case-modal-content {
-      transform: scale(1); opacity: 1;
     }
     /* Карточка вращения */
     .spin-box {
@@ -134,15 +85,6 @@
       margin: 0 auto 12px auto;
       perspective: 600px; position: relative;
       display: flex; align-items: center; justify-content: center;
-      overflow: visible;
-    }
-    .spin-box.win-revealed {
-      animation: winpop .6s cubic-bezier(.3,1.3,.3,1);
-    }
-    @keyframes winpop {
-      0% { transform: scale(1); }
-      60% { transform: scale(1.15); }
-      100% { transform: scale(1); }
     }
     .spin-inner {
       width: 100%; height: 100%;
@@ -192,15 +134,13 @@
     .win-rarity { font-size:15px; margin-top: 3px;}
     .close-win-btn {
       margin-top: 25px;
-      background: linear-gradient(135deg,var(--accent),var(--accent-dark));
+      background: linear-gradient(135deg,#f39c12,#e67e22);
       color: white; border: none; font-size: 17px; font-weight: 700;
       border-radius: 16px; padding: 10px 32px; cursor: pointer;
-      transition: background 0.18s, box-shadow 0.18s;
+      transition: background 0.18s;
       box-shadow: 0 4px 18px #f39c1244;
     }
-    .close-win-btn:active {
-      background: linear-gradient(135deg,var(--accent-dark),var(--accent));
-    }
+    .close-win-btn:active { background: linear-gradient(135deg,#e67e22,#f39c12);}
     .error { color: #e74c3c; font-size: 18px; margin: 16px auto 0 auto; text-align: center;}
   </style>
 </head>
@@ -226,7 +166,22 @@
     </div>
   </div>
 
-@@ -185,131 +245,129 @@
+  <div class="modal-bg" id="caseModal">
+    <div class="case-modal-content">
+      <div class="spin-box" id="spinBox">
+        <div class="spin-inner" id="spinInner">
+          <div class="spin-front" id="spinFront">
+            <span class="spin-mark" style="font-size:68px;">❓</span>
+          </div>
+          <div class="spin-back" id="spinBack">
+            <!-- Содержимое карточки появится тут -->
+          </div>
+        </div>
+      </div>
+      <button class="close-win-btn" style="margin-top:8px;display:none;" id="closeBtn" onclick="closeModal()">Забрать</button>
+    </div>
+  </div>
+
   <script>
     // Rarity цвета и ru-имена
     const rarityConfig = {
@@ -255,25 +210,30 @@
     async function updateTimer() {
       const timer = document.getElementById('timer');
       const openBtn = document.getElementById('openBtn');
+      timer.style.display = 'none';
+      openBtn.disabled = true;
       document.getElementById('errorText').textContent = '';
+      // Запрашиваем сервер: когда можно снова
+      if (!userId) return;
+      let canOpen = true;
       let wait = 0;
-      if (userId) {
-        try {
-          const res = await fetch(`/api/user/${userId}`);
-          const data = await res.json();
-          if (data && data.user && data.user.case_free) {
-            const now = Date.now();
-            if (now < Number(data.user.case_free)) {
-              wait = Math.ceil((Number(data.user.case_free) - now) / 1000);
-            }
+      try {
+        const res = await fetch(`/api/user/${userId}`);
+        const data = await res.json();
+        if (data && data.user && data.user.case_free) {
+          const now = Date.now();
+          if (now < Number(data.user.case_free)) {
+            wait = Math.ceil((Number(data.user.case_free)-now)/1000);
+            canOpen = false;
           }
-        } catch {}
-      }
-      if (wait > 0) {
+        }
+      } catch {}
+      if (!canOpen && wait>0) {
         openBtn.disabled = true;
         timer.style.display = '';
-        timer.textContent = `Можно открыть через ${wait > 59 ? Math.floor(wait / 60) + 'м ' : ''}${wait % 60}с`;
-        setTimeout(updateTimer, 1000);
+        timer.textContent = `Можно открыть через ${wait>59?Math.floor(wait/60)+'м ':''
+          }${wait%60}с`;
+        setTimeout(updateTimer, 900);
       } else {
         openBtn.disabled = false;
         timer.style.display = 'none';
@@ -291,18 +251,16 @@
       const modal = document.getElementById('caseModal');
       const spinInner = document.getElementById('spinInner');
       const spinBack = document.getElementById('spinBack');
-      const spinBox = document.getElementById('spinBox');
       const closeBtn = document.getElementById('closeBtn');
       spinBack.innerHTML = '';
       spinInner.style.transform = 'rotateY(0deg)';
-      spinBox.classList.remove('win-revealed');
       closeBtn.style.display = 'none';
       modal.classList.add('active');
 
       // Вращение вопроса (CSS)
       spinInner.style.transition = 'none';
       spinInner.style.transform = 'rotateY(0deg)';
-      setTimeout(()=>{spinInner.style.transition='transform 1.1s cubic-bezier(.3,1.5,.5,1)';},20);
+      setTimeout(()=>{spinInner.style.transition='transform 1s cubic-bezier(.3,1.5,.5,1)';},20);
 
       // Ждём анимацию, затем — сервер
       setTimeout(async ()=>{
@@ -337,8 +295,7 @@
           <div class="win-rarity"><span class="chance-dot ${rConf.class}"></span> ${rConf.ru}</div>
         `;
         // Поворачиваем карточку
-        spinInner.style.transform = 'rotateY(540deg)';
-        spinBox.classList.add('win-revealed');
+        spinInner.style.transform = 'rotateY(180deg)';
         setTimeout(()=>{ closeBtn.style.display = 'block'; },600);
         // После закрытия обновим таймер (по серверу!)
         setTimeout(updateTimer, 1000);
