@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Бесплатный кейс — Hockey Shootouts</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: linear-gradient(135deg, #232a37, #34495e 80%, #232a37 100%);
+      color: #fff;
+      font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+      margin: 0; min-height: 100vh;
+    }
+    .header-panel {
+      position: fixed; left: 0; top: 0; right: 0; z-index: 100;
+      background: rgba(52, 73, 94, 0.97);
+      padding: 17px 18px;
+      display: flex; align-items: center; justify-content: flex-start;
+      box-shadow: 0 2px 18px rgba(0,0,0,0.28);
+    }
+    .back-btn {
+      background: none; border: none; color: #fff; font-size: 19px;
+      cursor: pointer; padding: 5px 13px 5px 3px; font-weight: 600;
+      border-radius: 12px; transition: background 0.18s; margin-right: 7px;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.13);}
+    .main-block {
+      max-width: 400px; margin: 110px auto 0 auto;
+      padding: 32px 14px 0 14px; display: flex; flex-direction: column; align-items: center;
+    }
+    .case-preview {
+      background: rgba(255,255,255,0.09);
+      border-radius: 20px; box-shadow: 0 2px 24px #0002;
+      padding: 33px 22px 18px 22px;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .case-image {
+      width: 105px; height: 105px; margin-bottom: 10px;
+      border-radius: 16px; background: linear-gradient(120deg,#292d39 45%,#6c7599 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 53px; color: #f6c36e;
+      border: 4px solid #f39c12;
+      box-shadow: 0 2px 22px #0003;
+      margin-bottom: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+    .case-name { font-size: 23px; font-weight: 700; color: #f39c12; margin: 0 0 6px 0;}
+    .case-desc { opacity: .82; font-size: 16px; margin-bottom: 15px; text-align: center;}
+    .chance-list { width:100%; margin: 17px 0 10px 0;}
+    .chance-row { display:flex; justify-content:space-between; margin-bottom: 5px; font-size: 15px;}
+    .chance-dot { width:15px; height:15px; border-radius:50%; display:inline-block; margin-right:7px; vertical-align:middle;}
+    .dot-rare { background: linear-gradient(135deg, #2ecc71, #27ae60);}
+    .dot-superrare { background: linear-gradient(135deg, #3498db, #2980b9);}
+    .dot-epic { background: linear-gradient(135deg, #9b59b6, #8e44ad);}
+    .dot-mythic { background: linear-gradient(135deg,#e74c3c,#f85c77);}
+    .dot-legendary { background: linear-gradient(135deg,#ffe57a,#f39c12);}
+    .open-btn {
+      margin: 32px 0 8px 0; background: linear-gradient(135deg,#f39c12,#e67e22);
+      color: #fff; border: none; font-size: 20px; font-weight: 700; border-radius: 22px;
+      padding: 15px 44px; cursor: pointer; transition: background 0.18s;
+      box-shadow: 0 6px 24px #f39c1270;
+    }
+    .open-btn:active { background: linear-gradient(135deg,#e67e22,#f39c12);}
+    .open-btn[disabled] { opacity: .6; cursor: not-allowed;}
+    .timer {margin-top: 15px; color: #ffe080; font-size: 18px;}
+    /* Модалка */
+    .modal-bg {
+      position: fixed; left:0; top:0; width:100vw; height:100vh;
+      z-index: 9999; background: rgba(0,0,0,0.88);
+      display: none; justify-content: center; align-items: center;
+      transition: opacity .18s;
+    }
+    .modal-bg.active { display: flex;}
+    .case-modal-content {
+      background: #232a37;
+      border-radius: 22px; padding: 44px 26px 36px 26px;
+      min-width: 290px; min-height: 210px; box-shadow: 0 8px 44px #1118;
+      display: flex; flex-direction: column; align-items: center; position: relative;
+      overflow: visible;
+    }
+    /* Карточка вращения */
+    .spin-box {
+      width: 124px; height: 124px;
+      margin: 0 auto 12px auto;
+      perspective: 600px; position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .spin-inner {
+      width: 100%; height: 100%;
+      position: absolute;
+      transition: transform 1s cubic-bezier(.3,1.5,.5,1);
+      transform-style: preserve-3d;
+    }
+    .spin-front, .spin-back {
+      position:absolute; width:100%; height:100%; border-radius: 16px;
+      display: flex; align-items: center; justify-content: center; backface-visibility: hidden;
+      background: linear-gradient(120deg,#292d39 45%,#6c7599 100%);
+      border: 5px solid #f39c12;
+      box-shadow: 0 2px 34px #0006,0 0 44px #f6c36e44;
+      font-size: 70px; color: #f6c36e;
+      overflow: hidden;
+    }
+    .spin-back {
+      transform: rotateY(180deg); flex-direction:column; justify-content: center;
+      animation: popback .8s cubic-bezier(.4,1.7,.6,1) both;
+    }
+    @keyframes popback {
+      0% { filter: blur(2px) brightness(2) scale(0.8); opacity:0;}
+      60%{filter: blur(0.7px) brightness(1.5) scale(1.08);}
+      100% { filter: none; opacity:1; }
+    }
+    .shine {
+      position: absolute;
+      width: 140px; height: 140px;
+      left: 50%; top: 50%; transform: translate(-50%,-50%);
+      pointer-events: none;
+      background: radial-gradient(circle, #ffe57a99 0%, #fff0 80%);
+      opacity: 0.5;
+      animation: shine-anim 1.7s cubic-bezier(.5,1,.5,1) 1;
+    }
+    @keyframes shine-anim {
+      0% { opacity:0; transform: translate(-50%,-50%) scale(1);}
+      70%{ opacity:0.5; transform: translate(-50%,-50%) scale(1.12);}
+      100% { opacity:0; transform: translate(-50%,-50%) scale(1);}
+    }
+    .win-img {
+      width: 66px; height: 66px; border-radius: 12px; margin-bottom: 7px;
+      border: 3px solid #ffe57a; box-shadow: 0 0 24px #ffe57a66;
+      background: #fff2;
+      object-fit: cover;
+    }
+    .win-name { font-size: 20px; color:#ffe080; font-weight: 700;}
+    .win-rarity { font-size:15px; margin-top: 3px;}
+    .close-win-btn {
+      margin-top: 25px;
+      background: linear-gradient(135deg,#f39c12,#e67e22);
+      color: white; border: none; font-size: 17px; font-weight: 700;
+      border-radius: 16px; padding: 10px 32px; cursor: pointer;
+      transition: background 0.18s;
+      box-shadow: 0 4px 18px #f39c1244;
+    }
+    .close-win-btn:active { background: linear-gradient(135deg,#e67e22,#f39c12);}
+    .error { color: #e74c3c; font-size: 18px; margin: 16px auto 0 auto; text-align: center;}
+  </style>
+</head>
+<body>
+  <div class="header-panel">
+    <button class="back-btn" onclick="window.location='index.html'">← Меню</button>
+  </div>
+  <div class="main-block">
+    <div class="case-preview">
+      <div class="case-image">🎁</div>
+      <div class="case-name">Бесплатный</div>
+      <div class="case-desc">Открывайте кейс бесплатно раз в минуту<br>и получайте случайную карточку!</div>
+      <div class="chance-list">
+        <div class="chance-row"><span><span class="chance-dot dot-rare"></span>Редкий</span><span>60%</span></div>
+        <div class="chance-row"><span><span class="chance-dot dot-superrare"></span>Сверхредкий</span><span>30%</span></div>
+        <div class="chance-row"><span><span class="chance-dot dot-epic"></span>Эпический</span><span>6%</span></div>
+        <div class="chance-row"><span><span class="chance-dot dot-mythic"></span>Мифический</span><span>3%</span></div>
+        <div class="chance-row"><span><span class="chance-dot dot-legendary"></span>Легендарный</span><span>1%</span></div>
+      </div>
+      <button class="open-btn" id="openBtn" onclick="openCase()" disabled>Открыть</button>
+      <div class="timer" id="timer" style="display:none;"></div>
+      <div class="error" id="errorText"></div>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="caseModal">
+    <div class="case-modal-content">
+      <div class="spin-box" id="spinBox">
+        <div class="spin-inner" id="spinInner">
+          <div class="spin-front" id="spinFront">
+            <span class="spin-mark" style="font-size:68px;">❓</span>
+          </div>
+          <div class="spin-back" id="spinBack">
+            <!-- Содержимое карточки появится тут -->
+          </div>
+        </div>
+      </div>
+      <button class="close-win-btn" style="margin-top:8px;display:none;" id="closeBtn" onclick="closeModal()">Забрать</button>
+    </div>
+  </div>
+
+  <script>
+    // Rarity цвета и ru-имена
+    const rarityConfig = {
+      rare:      { ru: 'Редкий',      class:'dot-rare' },
+      superrare: { ru: 'Сверхредкий', class:'dot-superrare' },
+      epic:      { ru: 'Эпический',  class:'dot-epic' },
+      mythic:    { ru: 'Мифический', class:'dot-mythic' },
+      legendary: { ru: 'Легендарный',class:'dot-legendary' }
+    };
+    function getCookie(name) {
+      const nameEQ = name + "=";
+      const ca = document.cookie.split(';');
+      for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) {
+          return c.substring(nameEQ.length, c.length);
+        }
+      }
+      return null;
+    }
+
+    // Получаем userId
+    let userId = getCookie('hockey_user_id');
+
+    async function updateTimer() {
+      const timer = document.getElementById('timer');
+      const openBtn = document.getElementById('openBtn');
+      timer.style.display = 'none';
+      openBtn.disabled = true;
+      document.getElementById('errorText').textContent = '';
+      // Запрашиваем сервер: когда можно снова
+      if (!userId) return;
+      let canOpen = true;
+      let wait = 0;
+      try {
+        const res = await fetch(`/api/user/${userId}`);
+        const data = await res.json();
+        if (data && data.user && data.user.case_free) {
+          const now = Date.now();
+          if (now < Number(data.user.case_free)) {
+            wait = Math.ceil((Number(data.user.case_free)-now)/1000);
+            canOpen = false;
+          }
+        }
+      } catch {}
+      if (!canOpen && wait>0) {
+        openBtn.disabled = true;
+        timer.style.display = '';
+        timer.textContent = `Можно открыть через ${wait>59?Math.floor(wait/60)+'м ':''
+          }${wait%60}с`;
+        setTimeout(updateTimer, 900);
+      } else {
+        openBtn.disabled = false;
+        timer.style.display = 'none';
+      }
+    }
+
+    async function openCase() {
+      if (!userId) return;
+      const openBtn = document.getElementById('openBtn');
+      const error = document.getElementById('errorText');
+      error.textContent = '';
+      openBtn.disabled = true;
+
+      // Открываем модалку с вращающимся вопросом
+      const modal = document.getElementById('caseModal');
+      const spinInner = document.getElementById('spinInner');
+      const spinBack = document.getElementById('spinBack');
+      const closeBtn = document.getElementById('closeBtn');
+      spinBack.innerHTML = '';
+      spinInner.style.transform = 'rotateY(0deg)';
+      closeBtn.style.display = 'none';
+      modal.classList.add('active');
+
+      // Вращение вопроса (CSS)
+      spinInner.style.transition = 'none';
+      spinInner.style.transform = 'rotateY(0deg)';
+      setTimeout(()=>{spinInner.style.transition='transform 1s cubic-bezier(.3,1.5,.5,1)';},20);
+
+      // Ждём анимацию, затем — сервер
+      setTimeout(async ()=>{
+        let card = null, wait = 0;
+        try {
+          const res = await fetch(`/api/user/${userId}/free-case`, { method:'POST' });
+          const data = await res.json();
+          if (data.status === 'error') {
+            error.textContent = data.message || 'Ошибка!';
+            modal.classList.remove('active');
+            openBtn.disabled = false;
+            updateTimer();
+            return;
+          }
+          card = data.card;
+          wait = data.next_sec || 60;
+        } catch(e) {
+          error.textContent = "Ошибка сервера!";
+          modal.classList.remove('active');
+          openBtn.disabled = false;
+          updateTimer();
+          return;
+        }
+
+        // Готовим карточку для отображения
+        const rConf = rarityConfig[card.rarity] || {ru:card.rarity,class:''};
+        spinBack.innerHTML = `
+          <div class="shine"></div>
+          <img src="https://raw.githubusercontent.com/ChatGPT-Course/Xokkey/main/avatar/${card.name}.jpg"
+            class="win-img" alt="${card.name}" onerror="this.src='https://via.placeholder.com/66x66?text=?'">
+          <div class="win-name">${card.name}</div>
+          <div class="win-rarity"><span class="chance-dot ${rConf.class}"></span> ${rConf.ru}</div>
+        `;
+        // Поворачиваем карточку
+        spinInner.style.transform = 'rotateY(180deg)';
+        setTimeout(()=>{ closeBtn.style.display = 'block'; },600);
+        // После закрытия обновим таймер (по серверу!)
+        setTimeout(updateTimer, 1000);
+      }, 1200);
+    }
+
+    function closeModal() {
+      document.getElementById('caseModal').classList.remove('active');
+      document.getElementById('closeBtn').style.display = 'none';
+    }
+
+    window.onload = function() {
+      updateTimer();
+    }
+  </script>
+</body>
+</html>

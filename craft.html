@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Крафт - Hockey Shootouts</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #2c3e50, #34495e, #2c3e50);
+            color: white;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .header-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(52, 73, 94, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-button-header {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-button-header:hover {
+            background: linear-gradient(135deg, #c0392b, #a93226);
+        }
+
+        .game-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e74c3c;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .debug-toggle {
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .debug-panel {
+            position: fixed;
+            top: 70px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            max-width: 350px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .craft-container {
+            padding: 80px 20px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .craft-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ecf0f1;
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .craft-rules {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .craft-rules h3 {
+            color: #3498db;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .rule-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .craft-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ecf0f1;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+        }
+
+        .card-item {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .card-item.disabled {
+            background: rgba(0, 0, 0, 0.5);
+            border-color: rgba(255, 255, 255, 0.05);
+            cursor: not-allowed;
+            opacity: 0.3;
+        }
+
+        .card-item.selected {
+            border-color: #3498db;
+            background: rgba(52, 152, 219, 0.2);
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .card-item:not(.disabled):hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .card-rarity-legendary {
+            border-color: #ffa500;
+            background: linear-gradient(135deg, rgba(255, 165, 0, 0.2), rgba(255, 215, 0, 0.1));
+        }
+
+        .card-rarity-mythic {
+            border-color: #e74c3c;
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.2), rgba(192, 57, 43, 0.1));
+        }
+
+        .card-rarity-epic {
+            border-color: #9b59b6;
+            background: linear-gradient(135deg, rgba(155, 89, 182, 0.2), rgba(142, 68, 173, 0.1));
+        }
+
+        .card-rarity-superrare {
+            border-color: #3498db;
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.2), rgba(41, 128, 185, 0.1));
+        }
+
+        .card-rarity-rare {
+            border-color: #2ecc71;
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.2), rgba(39, 174, 96, 0.1));
+        }
+
+        .card-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffffff, #ecf0f1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0 auto 12px;
+            box-shadow: 0 6px 15px rgba(255, 255, 255, 0.2);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+        }
+
+        .avatar-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .card-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #ecf0f1;
+            margin-bottom: 6px;
+        }
+
+        .card-rarity {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .rarity-legendary {
+            background: linear-gradient(135deg, #ffa500, #ffd700);
+            color: #000;
+        }
+
+        .rarity-mythic {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .rarity-epic {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+        }
+
+        .rarity-superrare {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .rarity-rare {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .selected-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #3498db;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .craft-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .recipe-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .recipe-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ecf0f1;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .recipe-btn.active {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            border-color: #9b59b6;
+            color: white;
+        }
+
+        .recipe-btn.disabled {
+            background: rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.1);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .craft-button {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            disabled: false;
+        }
+
+        .craft-button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4);
+        }
+
+        .craft-button:disabled {
+            background: linear-gradient(135deg, #7f8c8d, #95a5a6);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .craft-info {
+            text-align: center;
+            color: #bdc3c7;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        /* Загрузочный экран */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #2c3e50, #34495e, #2c3e50);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .loading-container {
+            text-align: center;
+            color: white;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #e74c3c;
+            animation: spin 1.5s ease-in-out infinite;
+            margin: 0 auto 20px;
+        }
+
+        .loading-container h2 {
+            margin: 0;
+            font-size: 20px;
+            color: #ecf0f1;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-inventory {
+            text-align: center;
+            padding: 40px;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+        }
+
+        .error-container {
+            background: rgba(231, 76, 60, 0.1);
+            border: 2px solid #e74c3c;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .error-container h2 {
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+
+        /* Модальное окно результата крафта */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 3000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: rgba(52, 73, 94, 0.95);
+            backdrop-filter: blur(15px);
+            margin: 15% auto;
+            padding: 25px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (max-width: 480px) {
+            .game-title {
+                font-size: 16px;
+            }
+
+            .back-button-header {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .craft-title {
+                font-size: 20px;
+            }
+
+            .cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 8px;
+            }
+
+            .card-avatar {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .recipe-selector {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .recipe-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-panel">
+        <a href="index.html" class="back-button-header">
+            ← Меню
+        </a>
+        <div class="game-title">Hockey Shootouts</div>
+    </div>
+
+    <div id="debugPanel" class="debug-panel">
+        <div id="debugLogs">Инициализация крафта...</div>
+    </div>
+
+    <!-- Загрузочный экран -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <h2>Загрузка...</h2>
+        </div>
+    </div>
+
+    <div id="errorContainer" class="error-container" style="display: none;">
+        <h2>❌ Ошибка загрузки</h2>
+        <p id="errorMessage">Не удалось загрузить данные крафта</p>
+        <button onclick="location.reload()" class="craft-button" style="margin-top: 15px;">
+            Повторить
+        </button>
+    </div>
+
+    <div id="craftContainer" class="craft-container" style="display: none;">
+        <div class="craft-title">
+            🔨 Крафт карточек
+        </div>
+
+        <div class="craft-rules">
+            <h3>📋 Правила крафта:</h3>
+            <div class="rule-item">
+                <span>3 Редких → 1 Сверхредкий</span>
+            </div>
+            <div class="rule-item">
+                <span>3 Сверхредких → 1 Эпический</span>
+            </div>
+            <div class="rule-item">
+                <span>3 Эпических → 1 Мифический</span>
+            </div>
+            <div class="rule-item">
+                <span>3 Мифических → 1 Легендарный</span>
+            </div>
+        </div>
+
+        <div class="craft-section">
+            <div class="section-title">🃏 Ваши карточки</div>
+            <div id="cardsContainer" class="cards-grid">
+                <!-- Карточки будут добавлены через JavaScript -->
+            </div>
+            <div id="emptyInventory" class="empty-inventory" style="display: none;">
+                У вас нет карточек для крафта
+            </div>
+        </div>
+
+        <div class="craft-section">
+            <div class="section-title">⚡ Крафт</div>
+            <div class="craft-controls">
+                <button class="craft-button" id="craftButton" onclick="performCraft()" disabled>
+                    Крафт
+                </button>
+
+                <div class="craft-info" id="craftInfo">
+                    Выберите карточки для крафта
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно результата крафта -->
+    <div id="craftResultModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 300px; padding: 30px;">
+            <h3 style="text-align: center; margin-bottom: 20px; color: #3498db;">Вы получили</h3>
+            
+            <div id="cardReveal" class="card-reveal-container" style="text-align: center; margin-bottom: 20px;">
+                <!-- Сначала показываем знак вопроса -->
+                <div id="questionMark" class="question-mark" style="
+                    width: 100px; 
+                    height: 100px; 
+                    border-radius: 50%; 
+                    background: linear-gradient(135deg, #34495e, #2c3e50); 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    font-size: 48px; 
+                    color: #ecf0f1; 
+                    margin: 0 auto 15px; 
+                    border: 3px solid rgba(255, 255, 255, 0.3);
+                    transition: all 0.5s ease;
+                ">?</div>
+                
+                <!-- Затем показываем карточку -->
+                <div id="revealedCard" style="display: none; opacity: 0; transition: all 0.5s ease;">
+                    <div class="card-avatar" id="revealedCardAvatar" style="
+                        width: 100px; 
+                        height: 100px; 
+                        border-radius: 50%; 
+                        background: linear-gradient(135deg, #ffffff, #ecf0f1); 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        font-size: 32px; 
+                        font-weight: bold; 
+                        color: #2c3e50; 
+                        margin: 0 auto 15px; 
+                        box-shadow: 0 6px 15px rgba(255, 255, 255, 0.2); 
+                        border: 3px solid rgba(255, 255, 255, 0.3); 
+                        overflow: hidden;
+                    "></div>
+                    <div class="card-name" id="revealedCardName" style="
+                        font-size: 18px; 
+                        font-weight: bold; 
+                        color: #ecf0f1; 
+                        margin-bottom: 8px;
+                    "></div>
+                    <div class="card-rarity" id="revealedCardRarity" style="
+                        font-size: 12px; 
+                        font-weight: 600; 
+                        padding: 4px 12px; 
+                        border-radius: 15px; 
+                        text-transform: uppercase; 
+                        letter-spacing: 0.5px; 
+                        display: inline-block;
+                    "></div>
+                </div>
+            </div>
+            
+            <button class="modal-btn" onclick="closeCraftResultModal()" id="craftOkButton" style="
+                background: linear-gradient(135deg, #27ae60, #2ecc71); 
+                color: white; 
+                border: none; 
+                padding: 12px 30px; 
+                border-radius: 8px; 
+                font-size: 16px; 
+                font-weight: 600; 
+                cursor: pointer; 
+                width: 100%;
+                transition: all 0.3s ease;
+                display: none;
+            ">Хорошо</button>
+        </div>
+    </div>
+
+    <script>
+        let API_BASE = '';
+        let currentUser = null;
+        let debugVisible = false;
+        let userCards = {};
+        let selectedCards = {};
+        let currentRecipe = null;
+
+        // Данные о карточках
+        const cardsData = {
+            'шабанов': { name: 'Шабанов', rarity: 'legendary', rarityText: 'Легендарный' },
+            'грицюк': { name: 'Грицюк', rarity: 'epic', rarityText: 'Эпический' },
+            'демидов': { name: 'Демидов', rarity: 'mythic', rarityText: 'Мифический' },
+            'ткачев_а': { name: 'Ткачев_А', rarity: 'epic', rarityText: 'Эпический' },
+            'барабанов': { name: 'Барабанов', rarity: 'epic', rarityText: 'Эпический' },
+            'хмелевский': { name: 'Хмелевский', rarity: 'mythic', rarityText: 'Мифический' },
+            'абросимов': { name: 'Абросимов', rarity: 'superrare', rarityText: 'Сверхредкий' },
+            'аймурзин': { name: 'Аймурзин', rarity: 'epic', rarityText: 'Эпический' },
+            'барулин': { name: 'Барулин', rarity: 'superrare', rarityText: 'Сверхредкий' },
+            'бикмуллин': { name: 'Бикмуллин', rarity: 'rare', rarityText: 'Редкий' },
+            'уильям': { name: 'Уильям', rarity: 'superrare', rarityText: 'Сверхредкий' },
+            'бойко': { name: 'Бойко', rarity: 'rare', rarityText: 'Редкий' },
+            'бориков': { name: 'Бориков', rarity: 'epic', rarityText: 'Эпический' },
+            'брынцев': { name: 'Брынцев', rarity: 'rare', rarityText: 'Редкий' },
+            'галимов_арт': { name: 'Галимов_Арт', rarity: 'legendary', rarityText: 'Легендарный' },
+            'гераськин': { name: 'Гераськин', rarity: 'superrare', rarityText: 'Сверхредкий' },
+            'глотов': { name: 'Глотов', rarity: 'epic', rarityText: 'Эпический' },
+            'гутик': { name: 'Гутик', rarity: 'mythic', rarityText: 'Мифический' },
+            'данияр': { name: 'Данияр', rarity: 'rare', rarityText: 'Редкий' },
+            'демченко': { name: 'Демченко', rarity: 'epic', rarityText: 'Эпический' },
+            'дроздов': { name: 'Дроздов', rarity: 'epic', rarityText: 'Эпический' },
+            'дыняк': { name: 'Дыняк', rarity: 'superrare', rarityText: 'Сверхредкий' },
+            'ильенко': { name: 'Ильенко', rarity: 'epic', rarityText: 'Эпический' },
+            'кагарлицкий': { name: 'Кагарлицкий', rarity: 'mythic', rarityText: 'Мифический' },
+            'камара': { name: 'Камара', rarity: 'superrare', rarityText: 'Сверхредкий' },
+            'капустин': { name: 'Капустин', rarity: 'rare', rarityText: 'Редкий' },
+            'кара': { name: 'Кара', rarity: 'epic', rarityText: 'Эпический' },
+            'каюмов': { name: 'Каюмов', rarity: 'mythic', rarityText: 'Мифический' },
+            'киселевич': { name: 'Киселевич', rarity: 'rare', rarityText: 'Редкий' },
+            'классон': { name: 'Классон', rarity: 'superrare', rarityText: 'Сверхредкий' },
+            'коновалов': { name: 'Коновалов', rarity: 'rare', rarityText: 'Редкий' },
+            'конюшков': { name: 'Конюшков', rarity: 'superrare', rarityText: 'Сверхредкий' },
+            'корягин': { name: 'Корягин', rarity: 'rare', rarityText: 'Редкий' },
+            'кравцов': { name: 'Кравцов', rarity: 'legendary', rarityText: 'Легендарный' },
+            'кузнецов': { name: 'Кузнецов', rarity: 'legendary', rarityText: 'Легендарный' },
+            'ли': { name: 'Ли', rarity: 'superrare', rarityText: 'Сверхредкий' },
+            'мамин': { name: 'Мамин', rarity: 'epic', rarityText: 'Эпический' },
+            'радулов': { name: 'Радулов', rarity: 'legendary', rarityText: 'Легендарный' },
+            'локтионов': { name: 'Локтионов', rarity: 'epic', rarityText: 'Эпический' },
+            'фу': { name: 'Фу', rarity: 'epic', rarityText: 'Эпический' },
+            'сериков': { name: 'Сериков', rarity: 'rare', rarityText: 'Редкий' },
+            'ливо': { name: 'Ливо', rarity: 'legendary', rarityText: 'Легендарный' },
+            'голдобин': { name: 'Голдобин', rarity: 'mythic', rarityText: 'Мифический' },
+            'рушан': { name: 'Рушан', rarity: 'epic', rarityText: 'Эпический' }
+        };
+
+        // Рецепты крафта с возможными результатами
+        const craftRecipes = {
+            'rare': { 
+                required: 3, 
+                result: 'superrare', 
+                possibleCards: ['абросимов', 'барулин', 'уильям', 'гераськин', 'дыняк', 'камара', 'классон', 'конюшков', 'ли']
+            },
+            'superrare': { 
+                required: 3, 
+                result: 'epic', 
+                possibleCards: ['грицюк', 'ткачев_а', 'барабанов', 'аймурзин', 'бориков', 'глотов', 'демченко', 'дроздов', 'ильенко', 'кара', 'мамин', 'локтионов', 'фу', 'рушан']
+            },
+            'epic': { 
+                required: 3, 
+                result: 'mythic', 
+                possibleCards: ['демидов', 'хмелевский', 'гутик', 'кагарлицкий', 'каюмов', 'голдобин']
+            },
+            'mythic': { 
+                required: 3, 
+                result: 'legendary', 
+                possibleCards: ['шабанов', 'галимов_арт', 'кравцов', 'кузнецов', 'радулов', 'ливо']
+            }
+        };
+
+        // Debug функции
+        function toggleDebug() {
+            debugVisible = !debugVisible;
+            document.getElementById('debugPanel').style.display = debugVisible ? 'block' : 'none';
+        }
+
+        function addDebugLog(message, type = 'info') {
+            const debugLogs = document.getElementById('debugLogs');
+            const timestamp = new Date().toLocaleTimeString();
+            const icons = {
+                'success': '✅',
+                'error': '❌',
+                'info': 'ℹ️',
+                'warning': '⚠️'
+            };
+            const icon = icons[type] || 'ℹ️';
+            debugLogs.innerHTML += `[${timestamp}] ${icon} ${message}<br>`;
+            debugLogs.scrollTop = debugLogs.scrollHeight;
+        }
+
+        // Cookie функции
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) {
+                    const value = c.substring(nameEQ.length, c.length);
+                    addDebugLog(`🍪 Cookie получен: ${name}=${value}`, 'info');
+                    return value;
+                }
+            }
+            addDebugLog(`🍪 Cookie не найден: ${name}`, 'warning');
+            return null;
+        }
+
+        function initApiUrl() {
+            if (window.location.protocol === 'https:') {
+                API_BASE = window.location.origin;
+            } else {
+                API_BASE = `${window.location.protocol}//${window.location.hostname}:3004`;
+            }
+            addDebugLog(`🌐 API URL: ${API_BASE}`, 'info');
+        }
+
+        function showLoadingScreen() {
+            document.getElementById('loadingScreen').style.display = 'flex';
+            document.getElementById('craftContainer').style.display = 'none';
+            document.getElementById('errorContainer').style.display = 'none';
+        }
+
+        function showCraft() {
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('craftContainer').style.display = 'block';
+            document.getElementById('errorContainer').style.display = 'none';
+        }
+
+        function showError(message) {
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('craftContainer').style.display = 'none';
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorContainer').style.display = 'block';
+        }
+
+        function parseCardsString(cardsString) {
+            if (!cardsString || cardsString === '[]' || cardsString.trim() === '') {
+                return {};
+            }
+
+            const cards = {};
+            const cardsList = cardsString.trim().split(' ')
+                .map(card => card.trim().toLowerCase())
+                .filter(card => card.length > 0);
+
+            cardsList.forEach(card => {
+                if (cardsData[card]) {
+                    cards[card] = (cards[card] || 0) + 1;
+                }
+            });
+
+            return cards;
+        }
+
+        function renderCards() {
+            const cardsContainer = document.getElementById('cardsContainer');
+            const emptyInventory = document.getElementById('emptyInventory');
+
+            if (Object.keys(userCards).length === 0) {
+                cardsContainer.style.display = 'none';
+                emptyInventory.style.display = 'block';
+                return;
+            }
+
+            // Создаем отдельные карточки для каждого экземпляра
+            const individualCards = [];
+            Object.entries(userCards).forEach(([cardKey, count]) => {
+                const cardData = cardsData[cardKey];
+                if (!cardData) return;
+
+                for (let i = 0; i < count; i++) {
+                    individualCards.push({
+                        key: cardKey,
+                        id: `${cardKey}_${i}`,
+                        ...cardData
+                    });
+                }
+            });
+
+            // Сортируем по редкости
+            const rarityOrder = { 'legendary': 1, 'mythic': 2, 'epic': 3, 'superrare': 4, 'rare': 5 };
+            individualCards.sort((a, b) => rarityOrder[a.rarity] - rarityOrder[b.rarity]);
+
+            const cardsHtml = individualCards.map(card => {
+                const isLegendary = card.rarity === 'legendary';
+                const isDisabled = isLegendary || (currentRecipe && card.rarity !== currentRecipe);
+                const isSelected = selectedCards[card.id];
+
+                // Используем имя карточки как есть для GitHub URL
+                const imageUrl = `https://raw.githubusercontent.com/ChatGPT-Course/Xokkey/main/avatar/${card.name}.jpg`;
+
+                return `
+                    <div class="card-item card-rarity-${card.rarity} ${isDisabled ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" 
+                         onclick="selectCard('${card.id}', '${card.rarity}')" data-card="${card.id}">
+                        <div class="card-avatar">
+                            <img src="${imageUrl}" alt="${card.name}" class="avatar-image" 
+                                 onerror="this.style.display='none'; this.parentNode.innerHTML='${card.name.charAt(0).toUpperCase()}';">
+                        </div>
+                        <div class="card-name">${card.name}</div>
+                        <div class="card-rarity rarity-${card.rarity}">
+                            ${card.rarityText}
+                        </div>
+                        ${isSelected ? `<div class="selected-count">✓</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            cardsContainer.innerHTML = cardsHtml;
+            cardsContainer.style.display = 'grid';
+            emptyInventory.style.display = 'none';
+
+            addDebugLog(`✅ Отображено карточек: ${individualCards.length}`, 'success');
+        }
+
+        function selectCard(cardId, rarity) {
+            // Для карточек с подчеркиванием берем полный ключ до последнего подчеркивания с номером
+            const parts = cardId.split('_');
+            let cardKey;
+            if (parts.length > 2) {
+                // Если в cardId есть число в конце (например "ткачев_а_0"), убираем его
+                const lastPart = parts[parts.length - 1];
+                if (!isNaN(lastPart)) {
+                    cardKey = parts.slice(0, -1).join('_');
+                } else {
+                    cardKey = cardId;
+                }
+            } else {
+                cardKey = parts[0];
+            }
+            
+            const cardData = cardsData[cardKey];
+            if (!cardData || cardData.rarity === 'legendary') {
+                return;
+            }
+
+            // Если это первая выбранная карточка, устанавливаем рецепт
+            if (Object.keys(selectedCards).length === 0) {
+                currentRecipe = rarity;
+                addDebugLog(`🔧 Автоматически выбран рецепт: ${rarity}`, 'info');
+            }
+
+            // Проверяем, подходит ли карточка к текущему рецепту
+            if (rarity !== currentRecipe) {
+                return;
+            }
+
+            const recipe = craftRecipes[currentRecipe];
+            const totalSelected = Object.keys(selectedCards).length;
+
+            if (selectedCards[cardId]) {
+                // Убираем выбор
+                delete selectedCards[cardId];
+                // Если больше нет выбранных карточек, сбрасываем рецепт
+                if (Object.keys(selectedCards).length === 0) {
+                    currentRecipe = null;
+                }
+            } else if (totalSelected < recipe.required) {
+                // Добавляем выбор
+                selectedCards[cardId] = true;
+            }
+
+            renderCards();
+            updateCraftButton();
+
+            addDebugLog(`🎯 Карточка ${cardId}: ${selectedCards[cardId] ? 'выбрана' : 'убрана'}`, 'info');
+        }
+
+        function updateCraftButton() {
+            const craftButton = document.getElementById('craftButton');
+            const craftInfo = document.getElementById('craftInfo');
+
+            if (!currentRecipe) {
+                craftButton.disabled = true;
+                craftInfo.textContent = 'Выберите карточки для крафта';
+                return;
+            }
+
+            const recipe = craftRecipes[currentRecipe];
+            const totalSelected = Object.keys(selectedCards).length;
+            const rarityNames = {
+                'rare': 'редких',
+                'superrare': 'сверхредких',
+                'epic': 'эпических',
+                'mythic': 'мифических'
+            };
+            const resultNames = {
+                'rare': 'сверхредкую',
+                'superrare': 'эпическую',
+                'epic': 'мифическую',
+                'mythic': 'легендарную'
+            };
+
+            if (totalSelected === recipe.required) {
+                craftButton.disabled = false;
+                craftInfo.textContent = `Готов к крафту: ${recipe.required} ${rarityNames[currentRecipe]} → 1 ${resultNames[currentRecipe]}`;
+            } else {
+                craftButton.disabled = true;
+                craftInfo.textContent = `Выберите ${recipe.required} ${rarityNames[currentRecipe]} карточек для получения одной ${resultNames[currentRecipe]} (${totalSelected}/${recipe.required})`;
+            }
+        }
+
+        async function performCraft() {
+            if (!currentRecipe || Object.keys(selectedCards).length === 0) {
+                return;
+            }
+
+            const recipe = craftRecipes[currentRecipe];
+            const totalSelected = Object.keys(selectedCards).length;
+
+            if (totalSelected !== recipe.required) {
+                alert(`Нужно выбрать ровно ${recipe.required} карточек`);
+                return;
+            }
+
+            addDebugLog(`🔨 Начинаем крафт: ${currentRecipe}`, 'info');
+
+            try {
+                const craftButton = document.getElementById('craftButton');
+                craftButton.disabled = true;
+                craftButton.textContent = 'Крафт...';
+
+                // Преобразуем выбранные карточки в формат для сервера
+                const selectedCardsForServer = {};
+                Object.keys(selectedCards).forEach(cardId => {
+                    const parts = cardId.split('_');
+                    let cardKey;
+                    if (parts.length > 2) {
+                        // Если в cardId есть число в конце (например "ткачев_а_0"), убираем его
+                        const lastPart = parts[parts.length - 1];
+                        if (!isNaN(lastPart)) {
+                            cardKey = parts.slice(0, -1).join('_');
+                        } else {
+                            cardKey = cardId;
+                        }
+                    } else {
+                        cardKey = parts[0];
+                    }
+                    selectedCardsForServer[cardKey] = (selectedCardsForServer[cardKey] || 0) + 1;
+                });
+
+                const response = await fetch(`${API_BASE}/api/user/${currentUser.id}/craft`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        recipe: currentRecipe,
+                        selectedCards: selectedCardsForServer
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    addDebugLog(`✅ Крафт успешен: получен ${data.craftedCard}`, 'success');
+
+                    // Показываем модальное окно с результатом
+                    showCraftResultModal(data.craftedCard);
+
+                    // Обновляем данные пользователя
+                    currentUser = data.user;
+                    userCards = parseCardsString(data.user.cards);
+                    selectedCards = {};
+                    currentRecipe = null;
+
+                    // Сбрасываем интерфейс
+                    document.getElementById('craftInfo').textContent = 'Выберите карточки для крафта';
+
+                    renderCards();
+                    updateCraftButton();
+                } else {
+                    addDebugLog(`❌ Ошибка крафта: ${data.message}`, 'error');
+                    alert(`❌ Ошибка крафта: ${data.message}`);
+                }
+            } catch (error) {
+                addDebugLog(`❌ Ошибка крафта: ${error.message}`, 'error');
+                alert(`❌ Ошибка сети: ${error.message}`);
+            }
+
+            const craftButton = document.getElementById('craftButton');
+            craftButton.textContent = 'Крафт';
+            updateCraftButton();
+        }
+
+        function showCraftResultModal(craftedCardKey) {
+            const modal = document.getElementById('craftResultModal');
+            const questionMark = document.getElementById('questionMark');
+            const revealedCard = document.getElementById('revealedCard');
+            const revealedCardAvatar = document.getElementById('revealedCardAvatar');
+            const revealedCardName = document.getElementById('revealedCardName');
+            const revealedCardRarity = document.getElementById('revealedCardRarity');
+            const okButton = document.getElementById('craftOkButton');
+
+            // Сначала показываем знак вопроса и скрываем кнопку
+            questionMark.style.display = 'flex';
+            revealedCard.style.display = 'none';
+            revealedCard.style.opacity = '0';
+            okButton.style.display = 'none';
+            
+            modal.style.display = 'block';
+
+            // Через 1 секунду открываем карточку
+            setTimeout(() => {
+                const cardData = cardsData[craftedCardKey];
+                if (cardData) {
+                    // Скрываем знак вопроса
+                    questionMark.style.display = 'none';
+                    
+                    // Настраиваем данные карточки
+                    const imageUrl = `https://raw.githubusercontent.com/ChatGPT-Course/Xokkey/main/avatar/${cardData.name}.jpg`;
+                    revealedCardAvatar.innerHTML = `<img src="${imageUrl}" alt="${cardData.name}" class="avatar-image" 
+                         onerror="this.style.display='none'; this.parentNode.innerHTML='${cardData.name.charAt(0).toUpperCase()}';">`;
+                    revealedCardName.textContent = cardData.name;
+                    revealedCardRarity.textContent = cardData.rarityText;
+                    
+                    // Устанавливаем цвет редкости
+                    revealedCardRarity.className = `card-rarity rarity-${cardData.rarity}`;
+                    
+                    // Показываем карточку с анимацией
+                    revealedCard.style.display = 'block';
+                    setTimeout(() => {
+                        revealedCard.style.opacity = '1';
+                        // Показываем кнопку "Хорошо" после появления карточки
+                        setTimeout(() => {
+                            okButton.style.display = 'block';
+                        }, 500);
+                    }, 100);
+                }
+            }, 1000);
+        }
+
+        function closeCraftResultModal() {
+            document.getElementById('craftResultModal').style.display = 'none';
+        }
+
+        async function loadUserData() {
+            const userId = getCookie('hockey_user_id');
+
+            if (!userId) {
+                addDebugLog('❌ ID пользователя не найден в cookie', 'error');
+                showError('Пользователь не авторизован. Вернитесь на главную страницу.');
+                return;
+            }
+
+            addDebugLog(`🔄 Загрузка данных пользователя ID: ${userId}`, 'info');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/user/${userId}`);
+                const data = await response.json();
+
+                if (response.ok && data.user) {
+                    currentUser = data.user;
+                    userCards = parseCardsString(data.user.cards);
+                    renderCards();
+                    showCraft();
+                    addDebugLog(`✅ Данные пользователя загружены`, 'success');
+                } else {
+                    addDebugLog(`❌ Пользователь не найден: ${data.message}`, 'error');
+                    showError('Пользователь не найден. Вернитесь на главную страницу.');
+                }
+            } catch (error) {
+                addDebugLog(`❌ Ошибка загрузки: ${error.message}`, 'error');
+                showError('Ошибка подключения к серверу');
+            }
+        }
+
+        // Инициализация
+        window.addEventListener('load', async () => {
+            addDebugLog('🚀 Запуск страницы крафта...', 'info');
+
+            showLoadingScreen();
+            initApiUrl();
+
+            // Проверяем сервер и загружаем данные пользователя
+            setTimeout(async () => {
+                try {
+                    const response = await fetch(`${API_BASE}/api/test`);
+                    if (response.ok) {
+                        addDebugLog('✅ Сервер доступен', 'success');
+                        await loadUserData();
+                    } else {
+                        addDebugLog('❌ Сервер недоступен', 'error');
+                        showError('Сервер недоступен. Попробуйте позже.');
+                    }
+                } catch (error) {
+                    addDebugLog(`❌ Ошибка сервера: ${error.message}`, 'error');
+                    showError('Ошибка подключения к серверу');                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
