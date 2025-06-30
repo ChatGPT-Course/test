@@ -1363,18 +1363,20 @@
         </div>
     </div>
 
-    <!-- Модальное окно спонсорства -->
-    <div id="sponsorModal" class="sponsor-modal">
-        <div class="sponsor-modal-content">
-            <h3>💎 Купить место</h3>
-            <p>Вы можете стать спонсором проекта и разместить свой канал.</p>
-            <p>Свяжитесь с администратором для получения дополнительной информации.</p>
-            <div class="sponsor-modal-buttons">
-                <button class="sponsor-modal-btn sponsor-modal-btn-contact" onclick="contactSponsorAdmin()">Связаться</button>
-                <button class="sponsor-modal-btn sponsor-modal-btn-cancel" onclick="closeSponsorModal()">Закрыть</button>
+        <!-- Модальное окно спонсорства -->
+        <div id="sponsorModal" class="sponsor-modal">
+            <div class="sponsor-modal-content">
+                <h3>💎 Купить место</h3>
+                <p style="margin-bottom:8px;"><b>Цены:</b> 100р / 24ч &nbsp;—&nbsp; 250р / 72ч</p>
+                <p>Вы можете стать спонсором проекта и разместить свой канал.</p>
+                <p>Свяжитесь с администратором для получения дополнительной информации.</p>
+                <div class="sponsor-modal-buttons">
+                    <button class="sponsor-modal-btn sponsor-modal-btn-contact" onclick="contactSponsorAdmin()">Связаться</button>
+                    <button class="sponsor-modal-btn sponsor-modal-btn-cancel" onclick="closeSponsorModal()">Закрыть</button>
+                </div>
             </div>
         </div>
-    </div>
+
 
         <!-- Модальное окно информации о бане -->
         <div id="banInfoModal" class="leaderboard-info-modal">
@@ -2199,5 +2201,44 @@
             }, 1000);
         });
     </script>
+<!-- Добавить этот div перед закрывающим тегом body -->
+<div id="subscriptionScreen" class="error-container" style="display: none;">
+  <div style="text-align: center; margin-bottom: 20px;">
+    <h2>📺 Требуется подписка</h2>
+    <p>Для доступа к игре необходимо подписаться на наши каналы</p>
+    
+    <div class="channels-container">
+      <div class="channel-item">
+        <div class="channel-avatar">
+          <img src="https://raw.githubusercontent.com/ChatGPT-Course/Xokkey/main/avatar/канал1.jpg" 
+               alt="Hockey Shootouts Channel" 
+               onerror="this.style.display='none'; this.parentNode.innerHTML='<span>🏒</span>';">
+        </div>
+        <div class="channel-name">Hockey Shootouts</div>
+        <button class="channel-subscribe-btn" onclick="window.open('https://t.me/hockey_shootouts', '_blank')">
+          Подписаться
+        </button>
+      </div>
+      
+      <div class="channel-item">
+        <div class="channel-avatar">
+          <img src="https://raw.githubusercontent.com/ChatGPT-Course/Xokkey/main/avatar/канал2.jpg" 
+               alt="Hockey News Channel" 
+               onerror="this.style.display='none'; this.parentNode.innerHTML='<span>📰</span>';">
+        </div>
+        <div class="channel-name">Hockey News</div>
+        <button class="channel-subscribe-btn" onclick="window.open('https://t.me/hockey_news', '_blank')">
+          Подписаться
+        </button>
+      </div>
+    </div>
+    
+    <div class="modal-buttons" style="margin-top: 20px;">
+      <button onclick="checkSubscriptionAndReload()" class="modal-btn modal-btn-contact">
+        Я подписался
+      </button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
