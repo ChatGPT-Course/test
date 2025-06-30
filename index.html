@@ -119,7 +119,68 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6);
         }
-
+    
+        <!-- Добавить эти стили в тег style -->
+        .channels-container {
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+          margin: 20px 0;
+        }
+        
+        .channel-item {
+          display: flex;
+          align-items: center;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          padding: 12px;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .channel-avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(255, 255, 255, 0.1);
+          margin-right: 12px;
+          overflow: hidden;
+        }
+        
+        .channel-avatar img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        
+        .channel-avatar span {
+          font-size: 20px;
+        }
+        
+        .channel-name {
+          flex: 1;
+          font-size: 16px;
+          font-weight: 500;
+          color: #ecf0f1;
+        }
+        
+        .channel-subscribe-btn {
+          background: linear-gradient(135deg, #3498db, #2980b9);
+          color: white;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 8px;
+          font-size: 14px;
+          cursor: pointer;
+          transition: all 0.3s;
+        }
+        
+        .channel-subscribe-btn:hover {
+          background: linear-gradient(135deg, #2980b9, #3498db);
+          transform: translateY(-2px);
+        }
         .btn-secondary {
             background: rgba(255, 255, 255, 0.1);
             color: #ecf0f1;
@@ -1972,26 +2033,57 @@
         }
 
         async function checkSubscription() {
-            if (!telegramUser || !telegramUser.id) {
-                return false;
+          if (!telegramUser || !telegramUser.id) {
+            return false;
+          }
+        
+          try {
+            const response = await fetch(`${API_BASE}/api/check-subscription/${telegramUser.id}`);
+            const data = await response.json();
+        
+            if (response.ok) {
+              return data.isSubscribed;
+            } else {
+              addDebugLog(`❌ Ошибка проверки подписки: ${data.message}`, 'error');
+              return false;
             }
-
-            try {
-                const response = await fetch(`${API_BASE}/api/check-subscription/${telegramUser.id}`);
-                const data = await response.json();
-
-                if (response.ok) {
-                    return data.isSubscribed;
-                } else {
-                    addDebugLog(`❌ Ошибка проверки подписки: ${data.message}`, 'error');
-                    return false;
-                }
-            } catch (error) {
-                addDebugLog(`❌ Ошибка проверки подписки: ${error.message}`, 'error');
-                return false;
-            }
+          } catch (error) {
+            addDebugLog(`❌ Ошибка проверки подписки: ${error.message}`, 'error');
+            return false;
+          }
         }
-
+        
+        function showSubscriptionRequired() {
+          const mainContent = document.getElementById('mainContent');
+          const loadingScreen = document.getElementById('loadingScreen');
+          const maintenanceCheck = document.getElementById('maintenanceCheck');
+        
+          loadingScreen.style.display = 'none';
+          maintenanceCheck.style.display = 'none';
+          mainContent.style.display = 'none';
+          document.getElementById('subscriptionScreen').style.display = 'block';
+          
+          addDebugLog('📺 Показан экран требования подписки на 2 канала', 'warning');
+        }
+        
+        async function checkSubscriptionAndReload() {
+          const response = await fetch(`${API_BASE}/api/check-subscription/${telegramUser.id}`);
+          const data = await response.json();
+          
+          if (data.isSubscribed) {
+            document.getElementById('subscriptionScreen').style.display = 'none';
+            await checkOrCreateUser();
+            showMainContent();
+            await loadOnlineCount();
+            startOnlineUpdates();
+            addDebugLog('✅ Подписка подтверждена, доступ разрешен', 'success');
+          } else {
+            const remaining = data.totalChannels - data.subscribedChannels;
+            alert(`Пожалуйста, подпишитесь на все каналы (осталось: ${remaining})`);
+            addDebugLog(`❌ Подписано только на ${data.subscribedChannels} из ${data.totalChannels} каналов`, 'error');
+          }
+        }
+    
         function showSubscriptionRequired() {
             const mainContent = document.getElementById('mainContent');
             const loadingScreen = document.getElementById('loadingScreen');
